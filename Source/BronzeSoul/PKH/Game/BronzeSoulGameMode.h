@@ -13,5 +13,7 @@ UCLASS()
 class BRONZESOUL_API ABronzeSoulGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	ABronzeSoulGameMode();
 };
