@@ -14,7 +14,7 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 	PrimaryActorTick.bCanEverTick = false;
 
 	// Components
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PKH/Character/Paladin/Mesh/Paladin_J_Nordstrom.Paladin_J_Nordstrom'"));
 	if(MeshRef.Object)
 	{
 		GetMesh()->SetSkeletalMesh(MeshRef.Object);
@@ -43,7 +43,7 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 	bUseControllerRotationYaw = false;
 
 	// Animation
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceRef(TEXT("/Game/Characters/Mannequins/Animations/ABP_Manny.ABP_Manny_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceRef(TEXT("/Game/PKH/Character/Paladin/Blueprint/ABP_Paladin.ABP_Paladin_C"));
 	if(AnimInstanceRef.Class)
 	{
 		GetMesh()->SetAnimClass(AnimInstanceRef.Class);
