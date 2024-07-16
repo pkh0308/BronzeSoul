@@ -7,6 +7,7 @@
 #include "InputMappingContext.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "PKH/Component/EquipComponent.h"
 
 // Sets default values
 ABSPlayerCharacter::ABSPlayerCharacter()
@@ -37,6 +38,8 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 	CameraComp->bUsePawnControlRotation = false;
+
+	EquipComp = CreateDefaultSubobject<UEquipComponent>(TEXT("EquipComp"));
 
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationPitch = false;
@@ -72,6 +75,16 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 	{
 		IA_Jump = IA_JumpRef.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_AttackRef(TEXT("/Script/EnhancedInput.InputAction'/Game/PKH/Input/IA_BSAttack.IA_BSAttack'"));
+	if (IA_AttackRef.Object)
+	{
+		IA_Attack = IA_AttackRef.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_GuardRef(TEXT("/Script/EnhancedInput.InputAction'/Game/PKH/Input/IA_BSGuard.IA_BSGuard'"));
+	if (IA_GuardRef.Object)
+	{
+		IA_Guard = IA_GuardRef.Object;
+	}
 }
 
 void ABSPlayerCharacter::BeginPlay()
@@ -97,6 +110,9 @@ void ABSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputCompoennt->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ABSPlayerCharacter::Look);
 	EnhancedInputCompoennt->BindAction(IA_Jump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 	EnhancedInputCompoennt->BindAction(IA_Jump, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+	EnhancedInputCompoennt->BindAction(IA_Attack, ETriggerEvent::Started, this, &ABSPlayerCharacter::Attack);
+	EnhancedInputCompoennt->BindAction(IA_Guard, ETriggerEvent::Started, this, &ABSPlayerCharacter::Guard);
 }
 
 #pragma region Input
@@ -120,5 +136,15 @@ void ABSPlayerCharacter::Look(const FInputActionValue& InputAction)
 
 	AddControllerPitchInput(InputVec.Y);
 	AddControllerYawInput(InputVec.X);
+}
+
+void ABSPlayerCharacter::Attack(const FInputActionValue& InputAction)
+{
+	EquipComp->Attack();
+}
+
+void ABSPlayerCharacter::Guard(const FInputActionValue& InputAction)
+{
+	EquipComp->Guard();
 }
 #pragma endregion

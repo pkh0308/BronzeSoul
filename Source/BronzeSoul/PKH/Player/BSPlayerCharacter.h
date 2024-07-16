@@ -35,6 +35,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UCameraComponent> CameraComp;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UEquipComponent> EquipComp;
+
 
 // Input
 protected:
@@ -51,12 +54,24 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<class UInputAction> IA_Jump;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<class UInputAction> IA_Attack;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<class UInputAction> IA_Guard;
+
 	// Functions
 	UFUNCTION()
 	void Move(const FInputActionValue& InputAction);
 
 	UFUNCTION()
 	void Look(const FInputActionValue& InputAction);
+
+	UFUNCTION()
+	void Attack(const FInputActionValue& InputAction);
+
+	UFUNCTION()
+	void Guard(const FInputActionValue& InputAction);
 
 // Animation
 protected:
