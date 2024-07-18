@@ -118,6 +118,11 @@ void ABSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 #pragma region Input
 void ABSPlayerCharacter::Move(const FInputActionValue& InputAction)
 {
+	if(false == CanMove())
+	{
+		return;
+	}
+
 	const FVector2D InputVec = InputAction.Get<FVector2D>();
 
 	const FRotator Rotator = GetController()->GetControlRotation();
@@ -140,11 +145,33 @@ void ABSPlayerCharacter::Look(const FInputActionValue& InputAction)
 
 void ABSPlayerCharacter::Attack(const FInputActionValue& InputAction)
 {
+	if (false == CanAttack())
+	{
+		return;
+	}
+
 	EquipComp->Attack();
 }
 
 void ABSPlayerCharacter::Guard(const FInputActionValue& InputAction)
 {
 	EquipComp->Guard();
+}
+#pragma endregion
+
+#pragma region PlayerState
+bool ABSPlayerCharacter::CanMove()
+{
+	return (CurState == EPlayerState::Idle || CurState == EPlayerState::Guard);
+}
+
+bool ABSPlayerCharacter::CanAttack()
+{
+	return (CurState == EPlayerState::Idle || CurState == EPlayerState::Attack || CurState == EPlayerState::Guard);
+}
+
+void ABSPlayerCharacter::SetState(EPlayerState NewState)
+{
+	CurState = NewState;
 }
 #pragma endregion

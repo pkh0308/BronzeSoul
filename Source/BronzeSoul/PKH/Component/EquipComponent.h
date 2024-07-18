@@ -31,7 +31,7 @@ protected:
 	TObjectPtr<class ABSPlayerCharacter> Player;
 
 	UPROPERTY(VisibleAnywhere, Category = "Player")
-	TObjectPtr<class UAnimInstance> AnimInstance;
+	TObjectPtr<class UPaladinAnimInstance> AnimInstance;
 
 	EWeaponType CurWeapon = EWeaponType::None;
 
@@ -46,10 +46,6 @@ protected:
 	int32 MaxCombo = 3;
 
 	void DoCombo();
-
-	// Test
-	FTimerHandle EnableHandle;
-	FTimerHandle DisableHandle;
 
 public:
 	void Attack();

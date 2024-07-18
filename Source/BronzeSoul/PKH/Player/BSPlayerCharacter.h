@@ -7,6 +7,16 @@
 #include "InputActionValue.h"
 #include "BSPlayerCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EPlayerState : uint8
+{
+	Idle = 0,
+	Attack,
+	Guard,
+	Damaged,
+	Die
+};
+
 UCLASS()
 class BRONZESOUL_API ABSPlayerCharacter : public ACharacter
 {
@@ -77,4 +87,16 @@ protected:
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<class UAnimInstance> AnimInstance;
+
+// State
+protected:
+	EPlayerState CurState = EPlayerState::Idle;
+
+	bool CanMove();
+	bool CanAttack();
+
+public:
+	void SetState(EPlayerState NewState);
+
+	FORCEINLINE EPlayerState GetState() const { return CurState; }
 };

@@ -1,6 +1,7 @@
 
 #include "PKH/Component/EquipComponent.h"
 
+#include "PKH/Animation/PaladinAnimInstance.h"
 #include "PKH/Player/BSPlayerCharacter.h"
 
 UEquipComponent::UEquipComponent()
@@ -14,7 +15,7 @@ void UEquipComponent::BeginPlay()
 	Super::BeginPlay();
 
 	Player = CastChecked<ABSPlayerCharacter>(GetOwner());
-	AnimInstance = CastChecked<UAnimInstance>(Player->GetMesh()->GetAnimInstance());
+	AnimInstance = CastChecked<UPaladinAnimInstance>(Player->GetMesh()->GetAnimInstance());
 }
 
 #pragma region Attack
@@ -32,23 +33,11 @@ void UEquipComponent::DoCombo()
 	{
 		return;
 	}
+	Player->SetState(EPlayerState::Attack);
 
-	++CurCombo;
 	DisableCombo();
+	AnimInstance->PlayMontage_Combo(++CurCombo);
 	UE_LOG(LogTemp, Log, TEXT("[EquipComponent] Combo %d"), CurCombo);
-
-	FTimerManager& TimeManager = GetWorld()->GetTimerManager();
-
-	if(TimeManager.IsTimerActive(DisableHandle))
-	{
-		TimeManager.ClearTimer(DisableHandle);
-	}
-
-	if(CurCombo < MaxCombo)
-	{
-		TimeManager.SetTimer(EnableHandle, this, &UEquipComponent::EnableCombo, 1.0f, false);
-	}
-	TimeManager.SetTimer(DisableHandle, this, &UEquipComponent::ResetCombo, 2.0f, false);
 }
 
 void UEquipComponent::EnableCombo()
@@ -65,6 +54,7 @@ void UEquipComponent::ResetCombo()
 {
 	CanNextCombo = false;
 	CurCombo = 0;
+	Player->SetState(EPlayerState::Idle);
 }
 #pragma endregion
 

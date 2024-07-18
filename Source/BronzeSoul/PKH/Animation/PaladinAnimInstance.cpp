@@ -8,7 +8,11 @@
 
 UPaladinAnimInstance::UPaladinAnimInstance()
 {
-
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_ComboMontageOneHandRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin/Blueprint/AM_AttackOneHand.AM_AttackOneHand'"));
+	if(AM_ComboMontageOneHandRef.Object)
+	{
+		AM_ComboMontageOneHand = AM_ComboMontageOneHandRef.Object;
+	}
 }
 
 void UPaladinAnimInstance::NativeInitializeAnimation()
@@ -39,3 +43,18 @@ void UPaladinAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsJumping = Velocity.Z > 0;
 	bIsFalling = MoveComp->IsFalling();
 }
+
+#pragma region Combo
+void UPaladinAnimInstance::PlayMontage_Combo(int32 Idx)
+{
+	if(Idx == 1)
+	{
+		Montage_Play(AM_ComboMontageOneHand);
+	}
+	else
+	{
+		FName NextCombo(FString::Printf(TEXT("Combo_%d"), Idx));
+		Montage_JumpToSection(NextCombo);
+	}
+}
+#pragma endregion

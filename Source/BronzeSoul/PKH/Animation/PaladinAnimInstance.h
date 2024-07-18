@@ -50,4 +50,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 RunThreshold = 250;
+
+// Montages
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAnimMontage> AM_ComboMontageOneHand;
+
+public:
+	void PlayMontage_Combo(int32 Idx);
 };
