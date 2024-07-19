@@ -175,3 +175,70 @@ void ABSPlayerCharacter::SetState(EPlayerState NewState)
 	CurState = NewState;
 }
 #pragma endregion
+
+#pragma region Hp
+void ABSPlayerCharacter::StaggerOff()
+{
+	SetState(EPlayerState::Idle);
+}
+
+void ABSPlayerCharacter::SetHp(int32 NewHp)
+{
+	CurHp = FMath::Clamp(NewHp, 0, MaxHp);
+	if(OnHpChanged.IsBound())
+	{
+		OnHpChanged.Broadcast(CurHp, MaxHp);
+	}
+
+	if(CurHp == 0)
+	{
+		OnDie();
+	}
+}
+
+void ABSPlayerCharacter::OnDamaged(int32 InDamage, float StaggerTime)
+{
+	SetState(EPlayerState::Damaged);
+	SetHp(CurHp - InDamage);
+
+	// Reset Timer if already timer in active
+	if (GetWorldTimerManager().IsTimerActive(StaggerHandle))
+	{
+		GetWorldTimerManager().ClearTimer(StaggerHandle);
+	}
+	GetWorldTimerManager().SetTimer(StaggerHandle, this, &ABSPlayerCharacter::StaggerOff, StaggerTime, false);
+}
+
+void ABSPlayerCharacter::OnDie()
+{
+	SetState(EPlayerState::Die);
+}
+
+int32 ABSPlayerCharacter::GetCurHp() const
+{
+	return CurHp;
+}
+#pragma endregion
+
+#pragma region Stamina
+void ABSPlayerCharacter::SetStamina(int32 NewStamina)
+{
+	CurStamina = FMath::Clamp(NewStamina, 0, MaxStamina);
+	if(OnStaminaChanged.IsBound())
+	{
+		OnStaminaChanged.Broadcast(CurStamina, MaxStamina);
+	}
+}
+
+int32 ABSPlayerCharacter::GetCurStamina() const
+{
+	return CurStamina;
+}
+#pragma endregion
+
+#pragma region Attack
+int32 ABSPlayerCharacter::GetPlayerAtk() const
+{
+	return PlayerAtk;
+}
+#pragma endregion

@@ -7,6 +7,9 @@
 #include "InputActionValue.h"
 #include "BSPlayerCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerHpChanged, int32, CurHp, int32, MaxHp);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerStaminaChanged, int32, CurStamina, int32, MaxStamina);
+
 UENUM(BlueprintType)
 enum class EPlayerState : uint8
 {
@@ -99,4 +102,50 @@ public:
 	void SetState(EPlayerState NewState);
 
 	FORCEINLINE EPlayerState GetState() const { return CurState; }
+
+// HP
+protected:
+	UPROPERTY(VisibleAnywhere, Category="Status")
+	int32 CurHp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Status")
+	int32 MaxHp;
+
+	FTimerHandle StaggerHandle;
+
+	void SetHp(int32 NewHp);
+
+	void StaggerOff();
+
+public:
+	FOnPlayerHpChanged OnHpChanged;
+
+	int32 GetCurHp() const;
+
+	void OnDamaged(int32 InDamage, float StaggerTime);
+
+	void OnDie();
+
+// Stamina
+protected:
+	UPROPERTY(VisibleAnywhere, Category = "Status")
+	int32 CurStamina;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Status")
+	int32 MaxStamina;
+
+	void SetStamina(int32 NewStamina);
+
+public:
+	FOnPlayerStaminaChanged OnStaminaChanged;
+
+	int32 GetCurStamina() const;
+
+// Attack
+protected:
+	UPROPERTY(EditDefaultsOnly, Category="Status")
+	int32 PlayerAtk;
+
+public:
+	int32 GetPlayerAtk() const;
 };
