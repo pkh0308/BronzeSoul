@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AIPerceptionTypes.h"
 #include "EnemyAIController.generated.h"
 
 /**
@@ -34,4 +35,12 @@ protected:
 public:
 	virtual void RunAI();
 	virtual void StopAI();
+
+// AI Perception
+protected:
+	FTimerHandle SightHandle;
+
+	void OnSightUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+	void OnLostPlayer();
 };

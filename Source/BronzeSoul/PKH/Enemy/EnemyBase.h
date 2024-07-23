@@ -61,4 +61,14 @@ public:
 	virtual void OnDamaged(int32 InDamage, float StaggerTime);
 
 	virtual void OnDie();
+
+// Attack
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Status")
+	int32 EnemyAtk;
+
+public:
+	int32 GetEnemyAtk() const;
+
+	virtual void Attack();
 };

@@ -81,3 +81,15 @@ void AEnemyBase::OnDie()
 	SetState(EEnemyState::Die);
 }
 #pragma endregion
+
+#pragma region Attack
+int32 AEnemyBase::GetEnemyAtk() const
+{
+	return EnemyAtk;
+}
+
+void AEnemyBase::Attack()
+{
+	UE_LOG(LogTemp, Log, TEXT("[EnemyBase::Attack] Attack"))
+}
+#pragma endregion

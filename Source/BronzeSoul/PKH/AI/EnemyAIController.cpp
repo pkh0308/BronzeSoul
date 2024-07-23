@@ -7,6 +7,10 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Perception/AIPerceptionTypes.h"
+#include "PKH/Enemy/EnemyBase.h"
+#include "PKH/Player/BSPlayerCharacter.h"
 
 AEnemyAIController::AEnemyAIController()
 {
@@ -30,6 +34,7 @@ void AEnemyAIController::OnPossess(APawn* InPawn)
 
 }
 
+#pragma region Run/Stop AI
 void AEnemyAIController::RunAI()
 {
 	BBComp = Blackboard;
@@ -50,3 +55,60 @@ void AEnemyAIController::StopAI()
 		BTComp->StopTree();
 	}
 }
+#pragma endregion
+
+#pragma region AI Perception
+void AEnemyAIController::OnSightUpdated(AActor* Actor, FAIStimulus Stimulus)
+{
+	if (false == Actor->IsA<ABSPlayerCharacter>())
+	{
+		return;
+	}
+
+	AEnemyBase* Enemy = Cast<AEnemyBase>(GetPawn());
+	if (nullptr == Enemy)
+	{
+		return;
+	}
+
+	if (BBComp->GetValueAsBool(TEXT("")))
+	{
+		return;
+	}
+
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		
+
+		/*BBComp->SetValueAsObject(KEY_PLAYER, Actor);
+		BBComp->SetValueAsBool(KEY_PLAYER_IN_SIGHT, true);
+
+		if (GetWorldTimerManager().IsTimerActive(SightHandle))
+		{
+			GetWorldTimerManager().ClearTimer(SightHandle);
+		}*/
+	}
+	else
+	{
+		//GetWorldTimerManager().SetTimer(SightHandle, this, &AEnemyAIController::OnLostPlayer, TIME_LIMIT, false);
+	}
+}
+
+void AEnemyAIController::OnLostPlayer()
+{
+	// ÀÌ¹Ì ½ÇÇàµÆ´Ù¸é ½ºÅµ
+	if (nullptr == BBComp->GetValueAsObject(TEXT("")))
+	{
+		return;
+	}
+
+	AEnemyBase* Enemy = Cast<AEnemyBase>(GetPawn());
+	if (Enemy)
+	{
+		
+	}
+
+	/*BBComp->SetValueAsObject(KEY_PLAYER, nullptr);
+	BBComp->SetValueAsBool(KEY_PLAYER_IN_SIGHT, false);*/
+}
+#pragma endregion

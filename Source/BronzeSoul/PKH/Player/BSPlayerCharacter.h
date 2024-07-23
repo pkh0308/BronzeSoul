@@ -51,6 +51,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UEquipComponent> EquipComp;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UStaticMeshComponent> WeaponComp;
+
 
 // Input
 protected:
@@ -146,6 +149,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Status")
 	int32 PlayerAtk;
 
+	UFUNCTION()
+	void OnWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, 
+		                      const FHitResult& SweepResult);
+
 public:
 	int32 GetPlayerAtk() const;
+
+	void SetWeaponCollision(bool IsAttacking);
 };

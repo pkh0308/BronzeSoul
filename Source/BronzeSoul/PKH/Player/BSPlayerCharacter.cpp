@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PKH/Component/EquipComponent.h"
+#include "PKH/Enemy/EnemyBase.h"
 
 // Sets default values
 ABSPlayerCharacter::ABSPlayerCharacter()
@@ -41,6 +42,13 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 
 	EquipComp = CreateDefaultSubobject<UEquipComponent>(TEXT("EquipComp"));
 
+	WeaponComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponComp"));
+	WeaponComp->SetupAttachment(GetMesh(), TEXT("Socket_RightHand"));
+	WeaponComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponComp->SetCollisionProfileName(TEXT("Weapon"));
+	WeaponComp->OnComponentBeginOverlap.AddDynamic(this, &ABSPlayerCharacter::OnWeaponBeginOverlap);
+
+	// Rotation
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -237,6 +245,30 @@ int32 ABSPlayerCharacter::GetCurStamina() const
 #pragma endregion
 
 #pragma region Attack
+void ABSPlayerCharacter::OnWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+											  int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor);
+	if(nullptr == Enemy)
+	{
+		return;
+	}
+
+	//Enemy->OnDamaged();
+}
+
+void ABSPlayerCharacter::SetWeaponCollision(bool IsAttacking)
+{
+	if(IsAttacking)
+	{
+		WeaponComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); 
+	}
+	else
+	{
+		WeaponComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
 int32 ABSPlayerCharacter::GetPlayerAtk() const
 {
 	return PlayerAtk;
