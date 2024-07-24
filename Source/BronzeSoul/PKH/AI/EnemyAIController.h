@@ -40,7 +40,23 @@ public:
 protected:
 	FTimerHandle SightHandle;
 
+	UPROPERTY(EditDefaultsOnly, Category="Perception")
+	float LostPlayerTime = 3.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAIPerceptionComponent> SightComp;
+
+	UFUNCTION()
 	void OnSightUpdated(AActor* Actor, FAIStimulus Stimulus);
 
+	UFUNCTION()
 	void OnLostPlayer();
+
+// IGenericTeamAgentInterface
+private:
+	int32 TeamID;
+
+public:
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 };

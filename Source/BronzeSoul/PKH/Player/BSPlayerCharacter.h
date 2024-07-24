@@ -1,8 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "BSPlayerCharacter.generated.h"
@@ -16,12 +17,13 @@ enum class EPlayerState : uint8
 	Idle = 0,
 	Attack,
 	Guard,
+	Dodging,
 	Damaged,
 	Die
 };
 
 UCLASS()
-class BRONZESOUL_API ABSPlayerCharacter : public ACharacter
+class BRONZESOUL_API ABSPlayerCharacter : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -68,7 +70,7 @@ protected:
 	TObjectPtr<class UInputAction> IA_Look;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	TObjectPtr<class UInputAction> IA_Jump;
+	TObjectPtr<class UInputAction> IA_Dodge;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<class UInputAction> IA_Attack;
@@ -89,10 +91,17 @@ protected:
 	UFUNCTION()
 	void Guard(const FInputActionValue& InputAction);
 
+	UFUNCTION()
+	void Dodge(const FInputActionValue& InputAction);
+
 // Animation
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	TObjectPtr<class UAnimInstance> AnimInstance;
+	TObjectPtr<class UPaladinAnimInstance> AnimInstance;
+
+// Direction
+protected:
+	FVector DirVec;
 
 // State
 protected:
@@ -153,8 +162,22 @@ protected:
 	void OnWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, 
 		                      const FHitResult& SweepResult);
 
+	void CancelAttack();
+
 public:
 	int32 GetPlayerAtk() const;
 
 	void SetWeaponCollision(bool IsAttacking);
+
+// Dodge
+public:
+	void DodgeEnd();
+
+// IGenericTeamAgentInterface
+private:
+	int32 TeamID;
+
+public:
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 };

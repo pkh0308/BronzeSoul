@@ -10,7 +10,7 @@
 
 UBTTask_SetMoveLoc::UBTTask_SetMoveLoc()
 {
-
+	NodeName = TEXT("SetPatrolLoc");
 }
 
 EBTNodeResult::Type UBTTask_SetMoveLoc::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -34,13 +34,13 @@ EBTNodeResult::Type UBTTask_SetMoveLoc::ExecuteTask(UBehaviorTreeComponent& Owne
 	{
 		return EBTNodeResult::Failed;
 	}
-
+	
 	const FVector& OriginLoc = OwnerPawn->GetActorLocation();
 	float PatrolRadius = BBComp->GetValueAsFloat(KEY_PATROL_DIST);
-	FNavLocation NextLoc;
-	if(NavSystem->GetRandomReachablePointInRadius(OriginLoc, PatrolRadius,NextLoc))
+	FNavLocation NextLoc; 
+	if(NavSystem->GetRandomPointInNavigableRadius(OriginLoc, PatrolRadius,NextLoc))
 	{
-		BBComp->SetValueAsVector(KEY_PATROL_LOC, NextLoc.Location);
+		BBComp->SetValueAsVector(KEY_PATROL_LOC, NextLoc.Location); 
 		return EBTNodeResult::Succeeded;
 	}
 

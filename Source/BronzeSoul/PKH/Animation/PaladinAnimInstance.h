@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -56,6 +56,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UAnimMontage> AM_ComboMontageOneHand;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAnimMontage> AM_Dodge;
+
 public:
 	void PlayMontage_Combo(int32 Idx);
+
+	void PlayMontage_Dodge();
 };

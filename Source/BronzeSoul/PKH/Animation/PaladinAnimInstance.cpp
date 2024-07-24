@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "PKH/Animation/PaladinAnimInstance.h"
@@ -12,6 +12,12 @@ UPaladinAnimInstance::UPaladinAnimInstance()
 	if(AM_ComboMontageOneHandRef.Object)
 	{
 		AM_ComboMontageOneHand = AM_ComboMontageOneHandRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_DodgeRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin/Blueprint/AM_Dodge.AM_Dodge'"));
+	if ( AM_DodgeRef.Object )
+	{
+		AM_Dodge = AM_DodgeRef.Object;
 	}
 }
 
@@ -58,3 +64,8 @@ void UPaladinAnimInstance::PlayMontage_Combo(int32 Idx)
 	}
 }
 #pragma endregion
+
+void UPaladinAnimInstance::PlayMontage_Dodge()
+{
+	Montage_Play(AM_Dodge);
+}

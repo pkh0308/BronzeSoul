@@ -1,4 +1,4 @@
-
+﻿
 #include "PKH/Player/BSPlayerCharacter.h"
 
 #include "EnhancedInputComponent.h"
@@ -7,12 +7,17 @@
 #include "InputMappingContext.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "PKH/Animation/PaladinAnimInstance.h"
 #include "PKH/Component/EquipComponent.h"
 #include "PKH/Enemy/EnemyBase.h"
 
 // Sets default values
 ABSPlayerCharacter::ABSPlayerCharacter()
 {
+	// TeamID
+	TeamID = FGenericTeamId(1);
+
+	// Tick Disable
 	PrimaryActorTick.bCanEverTick = false;
 
 	// Components
@@ -58,7 +63,6 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 	if(AnimInstanceRef.Class)
 	{
 		GetMesh()->SetAnimClass(AnimInstanceRef.Class);
-		AnimInstance = GetMesh()->GetAnimInstance();
 	}
 
 	// Input
@@ -78,10 +82,10 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 	{
 		IA_Look = IA_LookRef.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> IA_JumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/PKH/Input/IA_BSJump.IA_BSJump'"));
-	if (IA_JumpRef.Object)
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_DodgeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/PKH/Input/IA_BSDodge.IA_BSDodge'"));
+	if ( IA_DodgeRef.Object)
 	{
-		IA_Jump = IA_JumpRef.Object;
+		IA_Dodge = IA_DodgeRef.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> IA_AttackRef(TEXT("/Script/EnhancedInput.InputAction'/Game/PKH/Input/IA_BSAttack.IA_BSAttack'"));
 	if (IA_AttackRef.Object)
@@ -98,6 +102,8 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 void ABSPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AnimInstance = CastChecked<UPaladinAnimInstance>(GetMesh()->GetAnimInstance());
 
 	// Mapping
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
@@ -116,22 +122,23 @@ void ABSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputCompoennt->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ABSPlayerCharacter::Move);
 	EnhancedInputCompoennt->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ABSPlayerCharacter::Look);
-	EnhancedInputCompoennt->BindAction(IA_Jump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-	EnhancedInputCompoennt->BindAction(IA_Jump, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 	EnhancedInputCompoennt->BindAction(IA_Attack, ETriggerEvent::Started, this, &ABSPlayerCharacter::Attack);
 	EnhancedInputCompoennt->BindAction(IA_Guard, ETriggerEvent::Started, this, &ABSPlayerCharacter::Guard);
+	EnhancedInputCompoennt->BindAction(IA_Dodge, ETriggerEvent::Started, this, &ABSPlayerCharacter::Dodge);
 }
 
 #pragma region Input
 void ABSPlayerCharacter::Move(const FInputActionValue& InputAction)
 {
-	if(false == CanMove())
+	const FVector2D InputVec = InputAction.Get<FVector2D>();
+	DirVec.X = InputVec.X;
+	DirVec.Y = InputVec.Y;
+
+	if ( false == CanMove() )
 	{
 		return;
 	}
-
-	const FVector2D InputVec = InputAction.Get<FVector2D>();
 
 	const FRotator Rotator = GetController()->GetControlRotation();
 	const FRotator YawRotator = FRotator(0, Rotator.Yaw, 0);
@@ -165,6 +172,26 @@ void ABSPlayerCharacter::Guard(const FInputActionValue& InputAction)
 {
 	EquipComp->Guard();
 }
+
+void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
+{
+	CancelAttack();
+	SetState(EPlayerState::Dodging); UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::Dodge] X: %f, Y: %f"), DirVec.X, DirVec.Y);
+
+	// Rotate before rolling
+	const FRotator Rotator = GetController()->GetControlRotation();
+	const FRotator YawRotator = FRotator(0, Rotator.Yaw, 0);
+	const FVector ForwardVec = FRotationMatrix(YawRotator).GetUnitAxis(EAxis::X);
+
+	float DotValue = FVector::DotProduct(ForwardVec, DirVec);
+	float TargetRad = FMath::Acos(DotValue);
+	const FRotator TargetRotation = ForwardVec.RotateAngleAxisRad(TargetRad, GetActorUpVector()).ToOrientationRotator();
+	SetActorRotation(TargetRotation);
+
+	AnimInstance->PlayMontage_Dodge();
+}
+
+
 #pragma endregion
 
 #pragma region PlayerState
@@ -257,6 +284,17 @@ void ABSPlayerCharacter::OnWeaponBeginOverlap(UPrimitiveComponent* OverlappedCom
 	//Enemy->OnDamaged();
 }
 
+void ABSPlayerCharacter::CancelAttack()
+{
+	if(CurState != EPlayerState::Attack)
+	{
+		return;
+	}
+
+	SetState(EPlayerState::Idle);
+	EquipComp->ResetCombo();
+}
+
 void ABSPlayerCharacter::SetWeaponCollision(bool IsAttacking)
 {
 	if(IsAttacking)
@@ -272,5 +310,24 @@ void ABSPlayerCharacter::SetWeaponCollision(bool IsAttacking)
 int32 ABSPlayerCharacter::GetPlayerAtk() const
 {
 	return PlayerAtk;
+}
+#pragma endregion
+
+#pragma region Dodge
+void ABSPlayerCharacter::DodgeEnd()
+{
+	SetState(EPlayerState::Idle);
+}
+#pragma endregion
+
+#pragma region TeamID
+FGenericTeamId ABSPlayerCharacter::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
+void ABSPlayerCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+{
+	TeamID = NewTeamID;
 }
 #pragma endregion
