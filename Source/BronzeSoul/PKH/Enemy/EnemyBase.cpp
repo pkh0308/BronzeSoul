@@ -1,7 +1,8 @@
-
+﻿
 #include "PKH/Enemy/EnemyBase.h"
 
 #include "PKH/AI/EnemyAIController.h"
+#include "PKH/Player/BSPlayerCharacter.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 
 AEnemyBase::AEnemyBase()
@@ -63,7 +64,7 @@ void AEnemyBase::SetHp(int32 NewHp)
 	}
 }
 
-void AEnemyBase::OnDamaged(int32 InDamage, float StaggerTime)
+void AEnemyBase::OnDamaged(int32 InDamage, float StaggerTime, AActor* Attacker)
 {
 	SetState(EEnemyState::Damaged);
 	SetHp(CurHp - InDamage);
@@ -74,6 +75,11 @@ void AEnemyBase::OnDamaged(int32 InDamage, float StaggerTime)
 		GetWorldTimerManager().ClearTimer(StaggerHandle);
 	}
 	GetWorldTimerManager().SetTimer(StaggerHandle, this, &AEnemyBase::StaggerOff, StaggerTime, false);
+
+	if(Attacker->IsA<ABSPlayerCharacter>())
+	{
+		EnemyController->SetKey_Player(Attacker);
+	}
 }
 
 void AEnemyBase::OnDie()

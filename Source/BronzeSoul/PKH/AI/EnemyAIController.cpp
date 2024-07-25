@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "PKH/AI/EnemyAIController.h"
@@ -97,7 +97,7 @@ void AEnemyAIController::OnSightUpdated(AActor* Actor, FAIStimulus Stimulus)
 
 void AEnemyAIController::OnLostPlayer()
 {
-	// ÀÌ¹Ì ½ÇÇàµÆ´Ù¸é ½ºÅµ
+	// ì´ë¯¸ ì‹¤í–‰ëë‹¤ë©´ ìŠ¤í‚µ
 	if (nullptr == BBComp->GetValueAsObject(KEY_PLAYER))
 	{
 		return;
@@ -120,5 +120,12 @@ FGenericTeamId AEnemyAIController::GetGenericTeamId() const
 void AEnemyAIController::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 {
 	TeamID = NewTeamID;
+}
+#pragma endregion
+
+#pragma region Set Key
+void AEnemyAIController::SetKey_Player(AActor* Player)
+{
+	BBComp->SetValueAsObject(KEY_PLAYER, Player);
 }
 #pragma endregion

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -58,7 +58,7 @@ protected:
 public:
 	FOnEnemyHpChanged OnHpChanged;
 
-	virtual void OnDamaged(int32 InDamage, float StaggerTime);
+	virtual void OnDamaged(int32 InDamage, float StaggerTime, AActor* Attacker);
 
 	virtual void OnDie();
 

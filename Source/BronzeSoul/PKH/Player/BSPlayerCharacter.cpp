@@ -176,16 +176,20 @@ void ABSPlayerCharacter::Guard(const FInputActionValue& InputAction)
 void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
 {
 	CancelAttack();
-	SetState(EPlayerState::Dodging); UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::Dodge] X: %f, Y: %f"), DirVec.X, DirVec.Y);
+	SetState(EPlayerState::Dodging); 
 
 	// Rotate before rolling
 	const FRotator Rotator = GetController()->GetControlRotation();
 	const FRotator YawRotator = FRotator(0, Rotator.Yaw, 0);
 	const FVector ForwardVec = FRotationMatrix(YawRotator).GetUnitAxis(EAxis::X);
 
-	float DotValue = FVector::DotProduct(ForwardVec, DirVec);
-	float TargetRad = FMath::Acos(DotValue);
-	const FRotator TargetRotation = ForwardVec.RotateAngleAxisRad(TargetRad, GetActorUpVector()).ToOrientationRotator();
+	float TargetDeg = 0;
+	if ( DirVec.X == 1 && DirVec.Y == 0 ) TargetDeg = 0;
+	else if ( DirVec.X == 0 && DirVec.Y == 1 ) TargetDeg = 90;
+	else if ( DirVec.X == -1 && DirVec.Y == 0 ) TargetDeg = 180;
+	else if ( DirVec.X == 0 && DirVec.Y == -1 ) TargetDeg = 270;
+	
+	const FRotator TargetRotation = ForwardVec.RotateAngleAxis(TargetDeg, FVector::UpVector).ToOrientationRotator();
 	SetActorRotation(TargetRotation);
 
 	AnimInstance->PlayMontage_Dodge();
