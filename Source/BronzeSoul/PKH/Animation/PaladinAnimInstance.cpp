@@ -8,13 +8,13 @@
 
 UPaladinAnimInstance::UPaladinAnimInstance()
 {
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_ComboMontageOneHandRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin/Blueprint/AM_AttackOneHand.AM_AttackOneHand'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_ComboMontageOneHandRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin_RootAdded/Blueprint/AM_Attack.AM_Attack'"));
 	if(AM_ComboMontageOneHandRef.Object)
 	{
 		AM_ComboMontageOneHand = AM_ComboMontageOneHandRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_DodgeRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin/Blueprint/AM_Dodge.AM_Dodge'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_DodgeRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin_RootAdded/Blueprint/AM_Dodge.AM_Dodge'"));
 	if ( AM_DodgeRef.Object )
 	{
 		AM_Dodge = AM_DodgeRef.Object;

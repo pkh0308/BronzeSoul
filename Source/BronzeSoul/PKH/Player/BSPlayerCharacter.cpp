@@ -59,7 +59,7 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 	bUseControllerRotationYaw = false;
 
 	// Animation
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceRef(TEXT("/Game/PKH/Character/Paladin/Blueprint/ABP_Paladin.ABP_Paladin_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceRef(TEXT("/Game/PKH/Character/Paladin_RootAdded/Blueprint/ABP_Paladin.ABP_Paladin_C"));
 	if(AnimInstanceRef.Class)
 	{
 		GetMesh()->SetAnimClass(AnimInstanceRef.Class);
