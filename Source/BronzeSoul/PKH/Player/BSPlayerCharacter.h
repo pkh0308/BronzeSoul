@@ -56,6 +56,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UStaticMeshComponent> WeaponComp;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UStaticMeshComponent> ShieldComp;
+
 
 // Input
 protected:
@@ -89,7 +92,10 @@ protected:
 	void Attack(const FInputActionValue& InputAction);
 
 	UFUNCTION()
-	void Guard(const FInputActionValue& InputAction);
+	void GuardOn(const FInputActionValue& InputAction);
+
+	UFUNCTION()
+	void GuardOff(const FInputActionValue& InputAction);
 
 	UFUNCTION()
 	void Dodge(const FInputActionValue& InputAction);
@@ -169,9 +175,24 @@ public:
 
 	void SetWeaponCollision(bool IsAttacking);
 
+// Guard
+protected:
+	bool OnGuard = false;
+
+	UFUNCTION()
+	void OnShieldBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+									  const FHitResult& SweepResult);
+
+public:
+	void SetShieldCollision(bool CurGuard);
+
+	bool OnGuardNow() const;
+
 // Dodge
 public:
 	void DodgeEnd();
+
+
 
 // IGenericTeamAgentInterface
 private:

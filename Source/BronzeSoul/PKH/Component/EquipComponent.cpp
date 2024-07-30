@@ -1,4 +1,4 @@
-
+﻿
 #include "PKH/Component/EquipComponent.h"
 
 #include "PKH/Animation/PaladinAnimInstance.h"
@@ -59,15 +59,8 @@ void UEquipComponent::ResetCombo()
 #pragma endregion
 
 #pragma region Guard
-void UEquipComponent::Guard()
+bool UEquipComponent::HasShieldNow()
 {
-	UE_LOG(LogTemp, Log, TEXT("[EquipComponent] Guard"));
-
-	if(false == HasShield)
-	{
-		return;
-	}
-
-
+	return HasShield;
 }
 #pragma endregion

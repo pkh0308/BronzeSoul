@@ -40,10 +40,7 @@ protected:
 	uint8 bIsRunning : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 bIsJumping : 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 bIsFalling : 1;
+	uint8 bOnGuard : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 WalkThreshold = 5;

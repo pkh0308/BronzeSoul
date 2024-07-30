@@ -47,11 +47,19 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 
 	EquipComp = CreateDefaultSubobject<UEquipComponent>(TEXT("EquipComp"));
 
+	// Weapon
 	WeaponComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponComp"));
 	WeaponComp->SetupAttachment(GetMesh(), TEXT("Socket_RightHand"));
 	WeaponComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponComp->SetCollisionProfileName(TEXT("Weapon"));
 	WeaponComp->OnComponentBeginOverlap.AddDynamic(this, &ABSPlayerCharacter::OnWeaponBeginOverlap);
+
+	// Shield
+	ShieldComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldComp"));
+	ShieldComp->SetupAttachment(GetMesh(), TEXT("Socket_LeftHand"));
+	ShieldComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ShieldComp->SetCollisionProfileName(TEXT("Shield"));
+	ShieldComp->OnComponentBeginOverlap.AddDynamic(this, &ABSPlayerCharacter::OnShieldBeginOverlap);
 
 	// Rotation
 	bUseControllerRotationRoll = false;
@@ -124,7 +132,10 @@ void ABSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputCompoennt->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ABSPlayerCharacter::Look);
 
 	EnhancedInputCompoennt->BindAction(IA_Attack, ETriggerEvent::Started, this, &ABSPlayerCharacter::Attack);
-	EnhancedInputCompoennt->BindAction(IA_Guard, ETriggerEvent::Started, this, &ABSPlayerCharacter::Guard);
+
+	EnhancedInputCompoennt->BindAction(IA_Guard, ETriggerEvent::Started, this, &ABSPlayerCharacter::GuardOn);
+	EnhancedInputCompoennt->BindAction(IA_Guard, ETriggerEvent::Completed, this, &ABSPlayerCharacter::GuardOff);
+
 	EnhancedInputCompoennt->BindAction(IA_Dodge, ETriggerEvent::Started, this, &ABSPlayerCharacter::Dodge);
 }
 
@@ -168,9 +179,28 @@ void ABSPlayerCharacter::Attack(const FInputActionValue& InputAction)
 	EquipComp->Attack();
 }
 
-void ABSPlayerCharacter::Guard(const FInputActionValue& InputAction)
+void ABSPlayerCharacter::GuardOn(const FInputActionValue& InputAction)
 {
-	EquipComp->Guard();
+	if(false == EquipComp->HasShieldNow())
+	{
+		return;
+	}
+
+	SetState(EPlayerState::Guard);
+	UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::GuardOn] Guard On"));
+	SetShieldCollision(true);
+}
+
+void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
+{
+	if ( false == EquipComp->HasShieldNow() )
+	{
+		return;
+	}
+
+	SetState(EPlayerState::Idle);
+	UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::GuardOff] Guard Off"));
+	SetShieldCollision(false);
 }
 
 void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
@@ -194,8 +224,6 @@ void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
 
 	AnimInstance->PlayMontage_Dodge();
 }
-
-
 #pragma endregion
 
 #pragma region PlayerState
@@ -314,6 +342,31 @@ void ABSPlayerCharacter::SetWeaponCollision(bool IsAttacking)
 int32 ABSPlayerCharacter::GetPlayerAtk() const
 {
 	return PlayerAtk;
+}
+#pragma endregion
+
+#pragma region Guard
+void ABSPlayerCharacter::OnShieldBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+}
+
+void ABSPlayerCharacter::SetShieldCollision(bool CurGuard)
+{
+	if(OnGuard)
+	{
+		ShieldComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+	else
+	{
+		ShieldComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+bool ABSPlayerCharacter::OnGuardNow() const
+{
+	return OnGuard;
 }
 #pragma endregion
 

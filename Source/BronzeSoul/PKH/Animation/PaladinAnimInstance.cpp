@@ -46,8 +46,7 @@ void UPaladinAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsIdle = Velocity.Size2D() < WalkThreshold;
 	bIsWalking = Velocity.Size2D() >= WalkThreshold;
 	bIsRunning = Velocity.Size2D() > RunThreshold;
-	bIsJumping = Velocity.Z > 0;
-	bIsFalling = MoveComp->IsFalling();
+	bOnGuard = Player->OnGuardNow();
 }
 
 #pragma region Combo
