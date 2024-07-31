@@ -19,6 +19,18 @@ UPaladinAnimInstance::UPaladinAnimInstance()
 	{
 		AM_Dodge = AM_DodgeRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_GuardRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin_RootAdded/Blueprint/AM_Guard.AM_Guard'"));
+	if ( AM_GuardRef.Object )
+	{
+		AM_Guard = AM_GuardRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_DieRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin_RootAdded/Blueprint/AM_Die.AM_Die'"));
+	if ( AM_DieRef.Object )
+	{
+		AM_Die = AM_DieRef.Object;
+	}
 }
 
 void UPaladinAnimInstance::NativeInitializeAnimation()
@@ -67,4 +79,22 @@ void UPaladinAnimInstance::PlayMontage_Combo(int32 Idx)
 void UPaladinAnimInstance::PlayMontage_Dodge()
 {
 	Montage_Play(AM_Dodge);
+}
+
+void UPaladinAnimInstance::PlayMontage_Guard()
+{
+	if(bOnGuard)
+	{
+		Montage_Play(AM_Guard);
+	}
+	else
+	{
+		Montage_Play(AM_Guard);
+		Montage_JumpToSection(GuardOff);
+	}
+}
+
+void UPaladinAnimInstance::PlayMontage_Die()
+{
+	Montage_Play(AM_Die);
 }

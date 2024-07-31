@@ -43,6 +43,9 @@ protected:
 	uint8 bOnGuard : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 bIsDead : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 WalkThreshold = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -56,8 +59,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UAnimMontage> AM_Dodge;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAnimMontage> AM_Guard;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAnimMontage> AM_Die;
+
 public:
 	void PlayMontage_Combo(int32 Idx);
 
 	void PlayMontage_Dodge();
+
+	void PlayMontage_Guard();
+
+	void PlayMontage_Die();
+
+// Guard
+protected:
+	FName GuardOff = TEXT("GuardOff");
 };

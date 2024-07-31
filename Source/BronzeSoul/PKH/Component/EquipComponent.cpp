@@ -54,11 +54,20 @@ void UEquipComponent::ResetCombo()
 {
 	CanNextCombo = false;
 	CurCombo = 0;
-	Player->SetState(EPlayerState::Idle);
 }
 #pragma endregion
 
 #pragma region Guard
+void UEquipComponent::EquipShield()
+{
+	HasShield = true;
+}
+
+void UEquipComponent::UnequipShield()
+{
+	HasShield = false;
+}
+
 bool UEquipComponent::HasShieldNow()
 {
 	return HasShield;

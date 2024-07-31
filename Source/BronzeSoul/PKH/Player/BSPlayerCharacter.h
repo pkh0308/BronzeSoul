@@ -8,7 +8,7 @@
 #include "InputActionValue.h"
 #include "BSPlayerCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerHpChanged, int32, CurHp, int32, MaxHp);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerHealthChanged, int32, CurHp, int32, MaxHp);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerStaminaChanged, int32, CurStamina, int32, MaxStamina);
 
 UENUM(BlueprintType)
@@ -17,7 +17,7 @@ enum class EPlayerState : uint8
 	Idle = 0,
 	Attack,
 	Guard,
-	Dodging,
+	Dodge,
 	Damaged,
 	Die
 };
@@ -116,6 +116,11 @@ protected:
 	bool CanMove();
 	bool CanAttack();
 
+	void OnStateChanged_Attack();
+	void OnStateChanged_Guard();
+	void OnStateChanged_Dodge();
+	void OnStateChanged_Die();
+
 public:
 	void SetState(EPlayerState NewState);
 
@@ -127,7 +132,7 @@ protected:
 	int32 CurHp;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Status")
-	int32 MaxHp;
+	int32 MaxHp = 100;
 
 	FTimerHandle StaggerHandle;
 
@@ -136,7 +141,7 @@ protected:
 	void StaggerOff();
 
 public:
-	FOnPlayerHpChanged OnHpChanged;
+	FOnPlayerHealthChanged OnHealthChanged;
 
 	int32 GetCurHp() const;
 
@@ -150,7 +155,7 @@ protected:
 	int32 CurStamina;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Status")
-	int32 MaxStamina;
+	int32 MaxStamina = 100;
 
 	void SetStamina(int32 NewStamina);
 
@@ -170,6 +175,9 @@ protected:
 
 	void CancelAttack();
 
+	UPROPERTY(EditAnywhere)
+	int32 DeltaStaminaPerAttack = 5;
+
 public:
 	int32 GetPlayerAtk() const;
 
@@ -177,8 +185,6 @@ public:
 
 // Guard
 protected:
-	bool OnGuard = false;
-
 	UFUNCTION()
 	void OnShieldBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 									  const FHitResult& SweepResult);
@@ -192,7 +198,17 @@ public:
 public:
 	void DodgeEnd();
 
+// Die
+protected:
+	void GameOver();
 
+public:
+	bool IsDead();
+
+// UI
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UPlayerUIComponent> UIComp;
 
 // IGenericTeamAgentInterface
 private:

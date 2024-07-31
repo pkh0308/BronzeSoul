@@ -59,6 +59,9 @@ protected:
 	bool HasShield = false;
 
 public:
+	void EquipShield();
+	void UnequipShield();
+
 	bool HasShieldNow();
 
 		

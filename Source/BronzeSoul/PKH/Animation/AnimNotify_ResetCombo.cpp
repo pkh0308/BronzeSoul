@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "PKH/Animation/AnimNotify_ResetCombo.h"
@@ -24,4 +24,5 @@ void UAnimNotify_ResetCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 	}
 
 	EquipComp->ResetCombo();
+	Player->SetState(EPlayerState::Idle);
 }

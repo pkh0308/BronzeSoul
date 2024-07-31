@@ -5,6 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputMappingContext.h"
+#include "PlayerUIComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PKH/Animation/PaladinAnimInstance.h"
@@ -60,6 +61,9 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 	ShieldComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ShieldComp->SetCollisionProfileName(TEXT("Shield"));
 	ShieldComp->OnComponentBeginOverlap.AddDynamic(this, &ABSPlayerCharacter::OnShieldBeginOverlap);
+
+	// UI
+	UIComp = CreateDefaultSubobject<UPlayerUIComponent>(TEXT("UIComp"));
 
 	// Rotation
 	bUseControllerRotationRoll = false;
@@ -120,6 +124,14 @@ void ABSPlayerCharacter::BeginPlay()
 	{
 		Subsystem->AddMappingContext(InputMappingContext, 0);
 	}
+
+	// Initialize
+	SetHp(MaxHp);
+	SetStamina(MaxStamina);
+	SetState(EPlayerState::Idle);
+
+	// Test
+	EquipComp->EquipShield();
 }
 
 void ABSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -133,10 +145,10 @@ void ABSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputCompoennt->BindAction(IA_Attack, ETriggerEvent::Started, this, &ABSPlayerCharacter::Attack);
 
+	EnhancedInputCompoennt->BindAction(IA_Dodge, ETriggerEvent::Started, this, &ABSPlayerCharacter::Dodge);
+
 	EnhancedInputCompoennt->BindAction(IA_Guard, ETriggerEvent::Started, this, &ABSPlayerCharacter::GuardOn);
 	EnhancedInputCompoennt->BindAction(IA_Guard, ETriggerEvent::Completed, this, &ABSPlayerCharacter::GuardOff);
-
-	EnhancedInputCompoennt->BindAction(IA_Dodge, ETriggerEvent::Started, this, &ABSPlayerCharacter::Dodge);
 }
 
 #pragma region Input
@@ -176,7 +188,7 @@ void ABSPlayerCharacter::Attack(const FInputActionValue& InputAction)
 		return;
 	}
 
-	EquipComp->Attack();
+	EquipComp->Attack(); SetStamina(CurStamina - DeltaStaminaPerAttack);
 }
 
 void ABSPlayerCharacter::GuardOn(const FInputActionValue& InputAction)
@@ -186,9 +198,13 @@ void ABSPlayerCharacter::GuardOn(const FInputActionValue& InputAction)
 		return;
 	}
 
+	CancelAttack();
 	SetState(EPlayerState::Guard);
-	UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::GuardOn] Guard On"));
+	UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::GuardOn] Guard On %d"), OnGuardNow());
+
 	SetShieldCollision(true);
+	//AnimInstance->PlayMontage_Guard();
+	MoveComp->bOrientRotationToMovement = false;
 }
 
 void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
@@ -199,14 +215,17 @@ void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
 	}
 
 	SetState(EPlayerState::Idle);
-	UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::GuardOff] Guard Off"));
+	UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::GuardOff] Guard Off %d"), OnGuardNow());
+
 	SetShieldCollision(false);
+	//AnimInstance->PlayMontage_Guard();
+	MoveComp->bOrientRotationToMovement = true;
 }
 
 void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
 {
 	CancelAttack();
-	SetState(EPlayerState::Dodging); 
+	SetState(EPlayerState::Dodge); 
 
 	// Rotate before rolling
 	const FRotator Rotator = GetController()->GetControlRotation();
@@ -240,6 +259,42 @@ bool ABSPlayerCharacter::CanAttack()
 void ABSPlayerCharacter::SetState(EPlayerState NewState)
 {
 	CurState = NewState;
+
+	switch(CurState)
+	{
+	case EPlayerState::Attack:
+		OnStateChanged_Attack();
+		break;
+	case EPlayerState::Dodge:
+		OnStateChanged_Dodge();
+		break;
+	case EPlayerState::Guard:
+		OnStateChanged_Guard();
+		break;
+	case EPlayerState::Die:
+		OnStateChanged_Die();
+		break;
+	}
+}
+
+void ABSPlayerCharacter::OnStateChanged_Attack()
+{
+
+}
+
+void ABSPlayerCharacter::OnStateChanged_Guard()
+{
+	EquipComp->ResetCombo();
+}
+
+void ABSPlayerCharacter::OnStateChanged_Dodge()
+{
+	EquipComp->ResetCombo();
+}
+
+void ABSPlayerCharacter::OnStateChanged_Die()
+{
+	
 }
 #pragma endregion
 
@@ -252,9 +307,9 @@ void ABSPlayerCharacter::StaggerOff()
 void ABSPlayerCharacter::SetHp(int32 NewHp)
 {
 	CurHp = FMath::Clamp(NewHp, 0, MaxHp);
-	if(OnHpChanged.IsBound())
+	if( OnHealthChanged.IsBound())
 	{
-		OnHpChanged.Broadcast(CurHp, MaxHp);
+		OnHealthChanged.Broadcast(CurHp, MaxHp); 
 	}
 
 	if(CurHp == 0)
@@ -274,11 +329,6 @@ void ABSPlayerCharacter::OnDamaged(int32 InDamage, float StaggerTime)
 		GetWorldTimerManager().ClearTimer(StaggerHandle);
 	}
 	GetWorldTimerManager().SetTimer(StaggerHandle, this, &ABSPlayerCharacter::StaggerOff, StaggerTime, false);
-}
-
-void ABSPlayerCharacter::OnDie()
-{
-	SetState(EPlayerState::Die);
 }
 
 int32 ABSPlayerCharacter::GetCurHp() const
@@ -354,7 +404,7 @@ void ABSPlayerCharacter::OnShieldBeginOverlap(UPrimitiveComponent* OverlappedCom
 
 void ABSPlayerCharacter::SetShieldCollision(bool CurGuard)
 {
-	if(OnGuard)
+	if(CurGuard)
 	{
 		ShieldComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
@@ -366,7 +416,7 @@ void ABSPlayerCharacter::SetShieldCollision(bool CurGuard)
 
 bool ABSPlayerCharacter::OnGuardNow() const
 {
-	return OnGuard;
+	return CurState == EPlayerState::Guard;
 }
 #pragma endregion
 
@@ -374,6 +424,26 @@ bool ABSPlayerCharacter::OnGuardNow() const
 void ABSPlayerCharacter::DodgeEnd()
 {
 	SetState(EPlayerState::Idle);
+}
+#pragma endregion
+
+#pragma region Die & GameOver
+bool ABSPlayerCharacter::IsDead()
+{
+	return CurState == EPlayerState::Die;
+}
+
+void ABSPlayerCharacter::OnDie()
+{
+	SetState(EPlayerState::Die);
+	AnimInstance->PlayMontage_Die();
+
+	GameOver();
+}
+
+void ABSPlayerCharacter::GameOver()
+{
+	UE_LOG(LogTemp, Warning, TEXT("[ABSPlayerCharacter::GameOver] GameOver"));
 }
 #pragma endregion
 
