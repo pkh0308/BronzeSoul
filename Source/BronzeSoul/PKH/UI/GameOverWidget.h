@@ -19,5 +19,23 @@ protected:
 
 // Widgets
 protected:
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	TObjectPtr<class UButton> Btn_Restart;
 
+	UPROPERTY(EditDefaultsOnly, meta = ( BindWidget ))
+	TObjectPtr<class UButton> Btn_Exit;
+
+	UPROPERTY(EditDefaultsOnly, meta = ( BindWidgetAnim ), Transient)
+	TObjectPtr<class UWidgetAnimation> Anim_GameOver;
+
+// For Bind
+protected:
+	UFUNCTION()
+	void OnClicked_Restart();
+
+	UFUNCTION()
+	void OnClicked_Exit();
+
+	UFUNCTION()
+	void OnVisible(ESlateVisibility InVisibility);
 };

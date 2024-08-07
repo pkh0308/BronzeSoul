@@ -5,6 +5,7 @@
 
 #include "BrainComponent.h"
 #include "BTKey.h"
+#include "TeamId.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
@@ -16,7 +17,7 @@
 AEnemyAIController::AEnemyAIController()
 {
 	// TeamID
-	TeamID = FGenericTeamId(2);
+	TeamID = TEAM_ID_ENEMY;
 
 	// Components
 	static ConstructorHelpers::FObjectFinder<UBlackboardData> BBDataRef(TEXT("/Script/AIModule.BlackboardData'/Game/PKH/Enemy/AI/BB_Enemy.BB_Enemy'"));

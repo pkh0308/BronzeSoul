@@ -33,7 +33,13 @@ void UEquipComponent::DoCombo()
 	{
 		return;
 	}
+	if(false == Player->UseStamina(5))
+	{
+		return;
+	}
+
 	Player->SetState(EPlayerState::Attack);
+	
 
 	DisableCombo();
 	AnimInstance->PlayMontage_Combo(++CurCombo);

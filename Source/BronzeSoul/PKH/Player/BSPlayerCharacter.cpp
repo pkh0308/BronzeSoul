@@ -1,6 +1,7 @@
 ﻿
 #include "PKH/Player/BSPlayerCharacter.h"
 
+#include "BSPlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -8,15 +9,17 @@
 #include "PlayerUIComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "PKH/AI/TeamId.h"
 #include "PKH/Animation/PaladinAnimInstance.h"
 #include "PKH/Component/EquipComponent.h"
 #include "PKH/Enemy/EnemyBase.h"
+#include "PKH/Game/BronzeSoulGameMode.h"
 
 // Sets default values
 ABSPlayerCharacter::ABSPlayerCharacter()
 {
 	// TeamID
-	TeamID = FGenericTeamId(1);
+	TeamID = TEAM_ID_PLAYER;
 
 	// Tick Disable
 	PrimaryActorTick.bCanEverTick = false;
@@ -116,9 +119,10 @@ void ABSPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	AnimInstance = CastChecked<UPaladinAnimInstance>(GetMesh()->GetAnimInstance());
+	GameMode = CastChecked<ABronzeSoulGameMode>(GetWorld()->GetAuthGameMode());
+	PlayerController = CastChecked<ABSPlayerController>(GetController());
 
 	// Mapping
-	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 	if (Subsystem)
 	{
@@ -129,6 +133,7 @@ void ABSPlayerCharacter::BeginPlay()
 	SetHp(MaxHp);
 	SetStamina(MaxStamina);
 	SetState(EPlayerState::Idle);
+	GetWorldTimerManager().SetTimer(StaminaRecoveryHandle, this, &ABSPlayerCharacter::RestoreStamina, DeltaTime_StaminaRecovery, true);
 
 	// Test
 	EquipComp->EquipShield();
@@ -188,12 +193,12 @@ void ABSPlayerCharacter::Attack(const FInputActionValue& InputAction)
 		return;
 	}
 
-	EquipComp->Attack(); SetStamina(CurStamina - DeltaStaminaPerAttack);
+	EquipComp->Attack();
 }
 
 void ABSPlayerCharacter::GuardOn(const FInputActionValue& InputAction)
 {
-	if(false == EquipComp->HasShieldNow())
+	if(false == CanGuardOn())
 	{
 		return;
 	}
@@ -209,7 +214,7 @@ void ABSPlayerCharacter::GuardOn(const FInputActionValue& InputAction)
 
 void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
 {
-	if ( false == EquipComp->HasShieldNow() )
+	if ( false == CanGuardOff() )
 	{
 		return;
 	}
@@ -224,6 +229,15 @@ void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
 
 void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
 {
+	if ( false == CanDodge() )
+	{
+		return;
+	}
+	if ( false == UseStamina(DeltaStamina_Dodge) )
+	{
+		return;
+	}
+
 	CancelAttack();
 	SetState(EPlayerState::Dodge); 
 
@@ -254,6 +268,31 @@ bool ABSPlayerCharacter::CanMove()
 bool ABSPlayerCharacter::CanAttack()
 {
 	return (CurState == EPlayerState::Idle || CurState == EPlayerState::Attack || CurState == EPlayerState::Guard);
+}
+
+bool ABSPlayerCharacter::CanGuardOn()
+{
+	if ( false == EquipComp->HasShieldNow() )
+	{
+		return false;
+	}
+
+	return (CurState == EPlayerState::Idle || CurState == EPlayerState::Attack);
+}
+
+bool ABSPlayerCharacter::CanGuardOff()
+{
+	if ( false == EquipComp->HasShieldNow() )
+	{
+		return false;
+	}
+
+	return CurState == EPlayerState::Guard;
+}
+
+bool ABSPlayerCharacter::CanDodge()
+{
+	return (CurState == EPlayerState::Idle || CurState == EPlayerState::Attack);
 }
 
 void ABSPlayerCharacter::SetState(EPlayerState NewState)
@@ -338,6 +377,16 @@ int32 ABSPlayerCharacter::GetCurHp() const
 #pragma endregion
 
 #pragma region Stamina
+void ABSPlayerCharacter::RestoreStamina()
+{
+	if(CurState == EPlayerState::Guard || CurState == EPlayerState::Die )
+	{
+		return;
+	}
+
+	SetStamina(CurStamina + DeltaStamina_Recovery);
+}
+
 void ABSPlayerCharacter::SetStamina(int32 NewStamina)
 {
 	CurStamina = FMath::Clamp(NewStamina, 0, MaxStamina);
@@ -350,6 +399,17 @@ void ABSPlayerCharacter::SetStamina(int32 NewStamina)
 int32 ABSPlayerCharacter::GetCurStamina() const
 {
 	return CurStamina;
+}
+
+bool ABSPlayerCharacter::UseStamina(int32 RequiredStamina)
+{
+	if(CurStamina < RequiredStamina)
+	{
+		return false;
+	}
+
+	SetStamina(CurStamina - RequiredStamina);
+	return true;
 }
 #pragma endregion
 
@@ -438,12 +498,15 @@ void ABSPlayerCharacter::OnDie()
 	SetState(EPlayerState::Die);
 	AnimInstance->PlayMontage_Die();
 
-	GameOver();
+	//GameOver();
 }
 
 void ABSPlayerCharacter::GameOver()
 {
 	UE_LOG(LogTemp, Warning, TEXT("[ABSPlayerCharacter::GameOver] GameOver"));
+
+	PlayerController->SetInputModeUI();
+	GameMode->GameOver();
 }
 #pragma endregion
 

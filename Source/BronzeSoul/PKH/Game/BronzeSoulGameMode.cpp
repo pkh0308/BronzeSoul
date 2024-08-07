@@ -1,7 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "PKH/Game/BronzeSoulGameMode.h"
+
+#include "PKH/UI/GameOverWidget.h"
 
 ABronzeSoulGameMode::ABronzeSoulGameMode()
 {
@@ -16,4 +18,30 @@ ABronzeSoulGameMode::ABronzeSoulGameMode()
 	{
 		PlayerControllerClass = PlayerControllerRef.Class;
 	}
+
+	// GameOver UI
+	static ConstructorHelpers::FClassFinder<UGameOverWidget> GameOverUIClassRef(TEXT("/Game/PKH/UI/WBP_GameOver.WBP_GameOver_C"));
+	if ( GameOverUIClassRef.Class )
+	{
+		GameOverUIClass = GameOverUIClassRef.Class;
+	}
 }
+
+void ABronzeSoulGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if(GameOverUIClass)
+	{
+		GameOverUI = CreateWidget<UGameOverWidget>(GetWorld(), GameOverUIClass);
+		GameOverUI->AddToViewport();
+		GameOverUI->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+#pragma region GameOver
+void ABronzeSoulGameMode::GameOver()
+{
+	GameOverUI->SetVisibility(ESlateVisibility::Visible);
+}
+#pragma endregion

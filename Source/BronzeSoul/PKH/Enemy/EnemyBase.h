@@ -60,8 +60,6 @@ public:
 
 	virtual void OnDamaged(int32 InDamage, float StaggerTime, AActor* Attacker);
 
-	virtual void OnDie();
-
 // Attack
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Status")
@@ -71,4 +69,23 @@ public:
 	int32 GetEnemyAtk() const;
 
 	virtual void Attack();
+
+// Speed
+protected:
+	UPROPERTY(EditAnywhere)
+	float WalkSpeed = 100.0f;
+
+	UPROPERTY(EditAnywhere)
+	float RunSpeed = 500.0f;
+
+public:
+	void SetEnemyWalk();
+	void SetEnemyRun();
+
+// Death
+protected:
+	virtual void OnDie();
+
+public:
+	bool IsDead() const;
 };

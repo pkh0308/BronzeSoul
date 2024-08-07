@@ -1,6 +1,7 @@
 ﻿
 #include "PKH/Enemy/EnemyBase.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "PKH/AI/EnemyAIController.h"
 #include "PKH/Player/BSPlayerCharacter.h"
 #include "Runtime/AIModule/Classes/AIController.h"
@@ -8,6 +9,9 @@
 AEnemyBase::AEnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	GetMesh()->SetRelativeLocation(FVector(0, 0, -90));
+	GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
 
 	static ConstructorHelpers::FClassFinder<AAIController> AIControllerRef(TEXT("/Game/PKH/Enemy/BP_EnemyAIController.BP_EnemyAIController_C"));
 	if(AIControllerRef.Class)
@@ -81,11 +85,6 @@ void AEnemyBase::OnDamaged(int32 InDamage, float StaggerTime, AActor* Attacker)
 		EnemyController->SetKey_Player(Attacker);
 	}
 }
-
-void AEnemyBase::OnDie()
-{
-	SetState(EEnemyState::Die);
-}
 #pragma endregion
 
 #pragma region Attack
@@ -99,3 +98,30 @@ void AEnemyBase::Attack()
 	UE_LOG(LogTemp, Log, TEXT("[EnemyBase::Attack] Attack"))
 }
 #pragma endregion
+
+#pragma region Speed
+void AEnemyBase::SetEnemyWalk()
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+}
+ 
+void AEnemyBase::SetEnemyRun()
+{
+	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+}
+#pragma endregion
+
+#pragma region Death
+void AEnemyBase::OnDie()
+{
+	SetState(EEnemyState::Die);
+
+
+}
+
+bool AEnemyBase::IsDead() const
+{
+	return CurState == EEnemyState::Die;
+}
+#pragma endregion
+

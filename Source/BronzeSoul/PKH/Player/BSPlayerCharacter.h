@@ -36,6 +36,14 @@ protected:
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+// Variables for convenience
+protected:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class ABronzeSoulGameMode> GameMode;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class ABSPlayerController> PlayerController;
+
 // Component
 protected:
 	UPROPERTY(EditDefaultsOnly)
@@ -115,6 +123,9 @@ protected:
 
 	bool CanMove();
 	bool CanAttack();
+	bool CanGuardOn();
+	bool CanGuardOff();
+	bool CanDodge();
 
 	void OnStateChanged_Attack();
 	void OnStateChanged_Guard();
@@ -157,12 +168,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Status")
 	int32 MaxStamina = 100;
 
+	UPROPERTY(EditAnywhere, Category = "Status")
+	int32 DeltaStamina_Recovery = 1;
+
+	UPROPERTY(EditAnywhere, Category = "Status")
+	float DeltaTime_StaminaRecovery = 0.2f;
+
+	FTimerHandle StaminaRecoveryHandle;
+
+	UFUNCTION()
+	void RestoreStamina();
+
 	void SetStamina(int32 NewStamina);
 
 public:
 	FOnPlayerStaminaChanged OnStaminaChanged;
 
 	int32 GetCurStamina() const;
+
+	bool UseStamina(int32 RequiredStamina);
 
 // Attack
 protected:
@@ -175,9 +199,6 @@ protected:
 
 	void CancelAttack();
 
-	UPROPERTY(EditAnywhere)
-	int32 DeltaStaminaPerAttack = 5;
-
 public:
 	int32 GetPlayerAtk() const;
 
@@ -185,6 +206,14 @@ public:
 
 // Guard
 protected:
+	UPROPERTY(EditAnywhere)
+	int32 DeltaStamina_Guard = 1;
+
+	UPROPERTY(EditAnywhere)
+	float DeltaTime_Guard = 0.1f;
+
+	FTimerHandle GuardHandle;
+
 	UFUNCTION()
 	void OnShieldBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 									  const FHitResult& SweepResult);
@@ -195,15 +224,17 @@ public:
 	bool OnGuardNow() const;
 
 // Dodge
+protected:
+	UPROPERTY(EditAnywhere)
+	int32 DeltaStamina_Dodge = 20;
+
 public:
 	void DodgeEnd();
 
 // Die
-protected:
-	void GameOver();
-
 public:
 	bool IsDead();
+	void GameOver();
 
 // UI
 protected:
