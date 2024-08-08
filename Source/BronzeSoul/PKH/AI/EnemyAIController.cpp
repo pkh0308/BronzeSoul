@@ -129,4 +129,9 @@ void AEnemyAIController::SetKey_Player(AActor* Player)
 {
 	BBComp->SetValueAsObject(KEY_PLAYER, Player);
 }
+
+AActor* AEnemyAIController::GetTargetActor() const
+{
+	return Cast<AActor>(BBComp->GetValueAsObject(KEY_PLAYER));
+}
 #pragma endregion

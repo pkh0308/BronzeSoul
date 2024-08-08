@@ -1,6 +1,7 @@
 ﻿
 #include "PKH/Enemy/EnemyBase.h"
 
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PKH/AI/EnemyAIController.h"
 #include "PKH/Player/BSPlayerCharacter.h"
@@ -27,6 +28,13 @@ void AEnemyBase::BeginPlay()
 
 	EnemyController = CastChecked<AEnemyAIController>(GetController());
 	RunAI();
+
+	// Test
+	FTimerHandle DieHandle;
+	GetWorldTimerManager().SetTimer(DieHandle, FTimerDelegate::CreateLambda([this]()
+	{
+		SetHp(0);
+	}), 5.0f, false);
 }
 
 #pragma region AI
@@ -115,13 +123,21 @@ void AEnemyBase::SetEnemyRun()
 void AEnemyBase::OnDie()
 {
 	SetState(EEnemyState::Die);
-
-
+	EnemyController->StopAI();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 bool AEnemyBase::IsDead() const
 {
 	return CurState == EEnemyState::Die;
+}
+
+void AEnemyBase::HideMesh()
+{
+	GetWorldTimerManager().SetTimer(HideMeshHandle, FTimerDelegate::CreateLambda([this]()
+	{
+		GetMesh()->SetHiddenInGame(true);
+	}), MeshHideDelay, false);
 }
 #pragma endregion
 

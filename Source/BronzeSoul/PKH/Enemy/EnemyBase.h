@@ -26,6 +26,11 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+// Animation
+protected:
+	UPROPERTY()
+	TObjectPtr<class UAnimInstance> AnimInstance;
+	
 // AI
 protected:
 	UPROPERTY(VisibleAnywhere, Category="AI")
@@ -84,8 +89,15 @@ public:
 
 // Death
 protected:
+	UPROPERTY(EditDefaultsOnly)
+	float MeshHideDelay = 5.0f;
+
+	FTimerHandle HideMeshHandle;
+
 	virtual void OnDie();
 
 public:
 	bool IsDead() const;
+
+	void HideMesh();
 };

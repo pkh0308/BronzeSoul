@@ -6,13 +6,13 @@
 #include "AIController.h"
 #include "BTKey.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "PKH/Enemy/EnemyBase.h"
+#include "PKH/Enemy/Mutant/Enemy_Mutant.h"
 
 EBTNodeResult::Type UBTTask_JumpAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	EBTNodeResult::Type SuperResult =  Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	AEnemyBase* OwnerEnemy = Cast<AEnemyBase>(OwnerComp.GetAIOwner()->GetPawn());
+	AEnemy_Mutant* OwnerEnemy = Cast<AEnemy_Mutant>(OwnerComp.GetAIOwner()->GetPawn());
 	if ( nullptr == OwnerEnemy )
 	{
 		return EBTNodeResult::Failed;
@@ -30,31 +30,16 @@ EBTNodeResult::Type UBTTask_JumpAttack::ExecuteTask(UBehaviorTreeComponent& Owne
 		return EBTNodeResult::Failed;
 	}
 
-	// 속도 조정
-	OwnerEnemy->SetEnemyRun();
+	// 애니메이션 완료 후에 종료하도록 InProgress 반환
+	// 실제 종료 처리는 AnimNotify를 통해 실행
+	OwnerEnemy->PlayJumpAttackAnim();
 
-	// 사거리보다 타겟이 멀다면 달리기
-	float JumpAttackDist = BBComp->GetValueAsFloat(KEY_JUMP_ATTACK_DIST);
-	if(FVector::Dist(OwnerEnemy->GetActorLocation(), Player->GetActorLocation()) > JumpAttackDist)
-	{
-		OwnerEnemy->SetEnemyRun();
-
-		/*FOnPasserAttackFinished OnAttakFinished;
-		OnAttakFinished.BindLambda([&]()
-		{
-			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-		});*/
-
-		return EBTNodeResult::InProgress;
-	}
-
-	// 사거리 안에 있다면 점프 공격 실행
-	// 애니메이션 완료 후에 종료 처리
-	/*FOnPasserAttackFinished OnAttakFinished;
-	OnAttakFinished.BindLambda([&]() 
+	FOnJumpAttackFinished OnJumpAttackFinished;
+	OnJumpAttackFinished.BindLambda([&]()
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-	});*/
+	});
 
+	OwnerEnemy->SetJumpAttackFinished(OnJumpAttackFinished);
 	return EBTNodeResult::InProgress;
 }

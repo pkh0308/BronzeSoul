@@ -56,6 +56,10 @@ protected:
 public:
 	void SetKey_Player(AActor* Player);
 
+// Getter
+public:
+	AActor* GetTargetActor() const;
+
 // IGenericTeamAgentInterface
 private:
 	int32 TeamID;

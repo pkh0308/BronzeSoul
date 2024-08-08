@@ -17,8 +17,24 @@ class BRONZESOUL_API UMutantAnimInstance : public UEnemyAnimInstance
 public:
 	UMutantAnimInstance();
 
+protected:
+	virtual void NativeInitializeAnimation() override;
+
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class AEnemy_Mutant> Mutant;
+
+// Flag
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 bIsWaitingJumpAttack : 1;
+
 // Montages
 protected:
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAnimMontage> Montage_Attack;
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UAnimMontage> Montage_JumpAttack;
 
@@ -26,6 +42,7 @@ protected:
 	TObjectPtr<class UAnimMontage> Montage_Die;
 
 public:
+	void PlayMontage_Attack();
 	void PlayMontage_JumpAttack();
 	void PlayMontage_Die();
 };

@@ -4,15 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_JumpAttack.generated.h"
-
-DECLARE_DELEGATE(FOnJumpAttackFinished);
+#include "BTTask_SetEnemyWalk.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BRONZESOUL_API UBTTask_JumpAttack : public UBTTaskNode
+class BRONZESOUL_API UBTTask_SetEnemyWalk : public UBTTaskNode
 {
 	GENERATED_BODY()
 

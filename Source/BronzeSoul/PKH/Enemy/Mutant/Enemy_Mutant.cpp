@@ -3,10 +3,14 @@
 
 #include "PKH/Enemy/Mutant/Enemy_Mutant.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
+#include "PKH/AI/EnemyAIController.h"
 #include "PKH/Animation/Enemy/MutantAnimInstance.h"
 
 AEnemy_Mutant::AEnemy_Mutant()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	// 메시 위치 조정
 	GetMesh()->AddRelativeLocation(FVector(-14, 0, 0));
 
@@ -27,9 +31,75 @@ void AEnemy_Mutant::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AnimInstance = CastChecked<UMutantAnimInstance>(GetMesh()->GetAnimInstance());
+	MyAnimInstance = CastChecked<UMutantAnimInstance>(GetMesh()->GetAnimInstance());
 
 	// Initialize
 	SetEnemyWalk();
-
 }
+
+void AEnemy_Mutant::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if(false == DoingJumpAttack)
+	{
+		return;
+	}
+
+	const FVector DirVec = ( Target->GetActorLocation() - GetActorLocation() ).GetSafeNormal();
+	SetActorRotation(DirVec.ToOrientationRotator());
+}
+
+#pragma region Attack
+void AEnemy_Mutant::Attack()
+{
+	Super::Attack();
+
+	MyAnimInstance->PlayMontage_Attack();
+}
+#pragma endregion
+
+#pragma region Jump Attack
+bool AEnemy_Mutant::IsDoingJumpAttack()
+{
+	return DoingJumpAttack;
+}
+
+void AEnemy_Mutant::BeginJumpAttack()
+{
+	Target = EnemyController->GetTargetActor();
+	if(Target) // Target이 nullptr이 아닐때만 점프 공격으로 이행
+	{
+		DoingJumpAttack = true;
+	}
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+}
+
+void AEnemy_Mutant::PlayJumpAttackAnim()
+{
+	MyAnimInstance->PlayMontage_JumpAttack();
+}
+
+void AEnemy_Mutant::SetJumpAttackFinished(FOnJumpAttackFinished NewOnJumpAttackFinished)
+{
+	OnJumpAttackFinished = NewOnJumpAttackFinished;
+}
+
+void AEnemy_Mutant::EndJumpAttack()
+{
+	DoingJumpAttack = false;
+	Target = nullptr;
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+
+	OnJumpAttackFinished.ExecuteIfBound();
+}
+#pragma endregion
+
+#pragma region Die
+void AEnemy_Mutant::OnDie()
+{
+	Super::OnDie();
+
+	MyAnimInstance->PlayMontage_Die();
+}
+#pragma endregion
