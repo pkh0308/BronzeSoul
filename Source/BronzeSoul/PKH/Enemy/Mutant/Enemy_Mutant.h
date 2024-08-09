@@ -36,17 +36,30 @@ protected:
 protected:
 	FOnJumpAttackFinished OnJumpAttackFinished;
 
-	bool DoingJumpAttack;
+	bool WaitingJumpAttack;
+	bool OnJumpAttack;
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<AActor> Target;
+	UPROPERTY(EditDefaultsOnly, category = "JumpAttack")
+	float JumpAttackTime = 1.5f;
+
+	UPROPERTY(VisibleAnywhere, category = "JumpAttack")
+	TObjectPtr<AActor> JA_Target;
+
+	UPROPERTY(VisibleAnywhere, category = "JumpAttack")
+	FVector JA_TargetLoc;
+
+	UPROPERTY(VisibleAnywhere, category = "JumpAttack")
+	FVector JA_TargetDir;
 
 public:
-	bool IsDoingJumpAttack();
+	bool IsWaitingJumpAttack();
 
 	void BeginJumpAttack();
 
 	void PlayJumpAttackAnim();
+
+	void OnJumpBegin();
+	void OnJumpEnd();
 
 	void SetJumpAttackFinished(FOnJumpAttackFinished NewOnJumpAttackFinished);
 
@@ -54,5 +67,5 @@ public:
 
 // Die
 protected:
-	virtual void OnDie();
+	virtual void OnDie() override;
 };

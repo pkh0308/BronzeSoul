@@ -42,7 +42,7 @@ void UMutantAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		return;
 	}
 
-	bIsWaitingJumpAttack = Mutant->IsDoingJumpAttack();
+	bIsWaitingJumpAttack = Mutant->IsWaitingJumpAttack();
 }
 
 #pragma region Montage

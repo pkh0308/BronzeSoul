@@ -49,10 +49,10 @@ public:
 // Hp
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Status")
-	int32 CurHp;
+	int32 CurHp = 100;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Status")
-	int32 MaxHp;
+	int32 MaxHp = 100;
 
 	FTimerHandle StaggerHandle;
 

@@ -67,7 +67,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UStaticMeshComponent> ShieldComp;
 
-
 // Input
 protected:
 	// Mapping Context
@@ -116,6 +115,11 @@ protected:
 // Direction
 protected:
 	FVector DirVec;
+
+// Equipment
+public:
+	void SetWeaponMesh(TObjectPtr<class UStaticMesh> NewWeaponMesh, FTransform NewTransform);
+	void SetShieldMesh(TObjectPtr<class UStaticMesh> NewShieldMesh, FTransform NewTransform);
 
 // State
 protected:

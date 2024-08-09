@@ -41,13 +41,17 @@ void AEnemy_Mutant::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if(false == DoingJumpAttack)
+	if(WaitingJumpAttack)
 	{
-		return;
+		const FVector DirVec = (JA_Target->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+		SetActorRotation(DirVec.ToOrientationRotator());
 	}
-
-	const FVector DirVec = ( Target->GetActorLocation() - GetActorLocation() ).GetSafeNormal();
-	SetActorRotation(DirVec.ToOrientationRotator());
+	else if(OnJumpAttack)
+	{
+		const FVector OriginLoc = GetActorLocation();
+		const FVector DeltaMove = FMath::VInterpTo(OriginLoc, JA_TargetLoc, DeltaSeconds, 1);
+		SetActorLocation(DeltaMove);
+	}
 }
 
 #pragma region Attack
@@ -60,24 +64,43 @@ void AEnemy_Mutant::Attack()
 #pragma endregion
 
 #pragma region Jump Attack
-bool AEnemy_Mutant::IsDoingJumpAttack()
+bool AEnemy_Mutant::IsWaitingJumpAttack()
 {
-	return DoingJumpAttack;
+	return WaitingJumpAttack;
 }
 
 void AEnemy_Mutant::BeginJumpAttack()
 {
-	Target = EnemyController->GetTargetActor();
-	if(Target) // Target이 nullptr이 아닐때만 점프 공격으로 이행
+	JA_Target = EnemyController->GetTargetActor();
+	if( JA_Target ) // Target이 nullptr이 아닐때만 점프 공격으로 이행
 	{
-		DoingJumpAttack = true;
+		WaitingJumpAttack = true;
 	}
 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 }
 
 void AEnemy_Mutant::PlayJumpAttackAnim()
 {
+	WaitingJumpAttack = false;
 	MyAnimInstance->PlayMontage_JumpAttack();
+
+	// 위치 계산
+	JA_TargetLoc = JA_Target->GetActorLocation();
+	JA_TargetDir = (JA_TargetLoc - GetActorLocation()).GetSafeNormal();
+}
+
+// 애니메이션에서 점프 뛰는 순간에 호출
+// 타겟 방향으로 이동 시작
+void AEnemy_Mutant::OnJumpBegin()
+{
+	OnJumpAttack = true;
+}
+
+// 애니메이션에서 점프가 끝나는 순간에 호출
+// 타겟 방향으로 이동 중지
+void AEnemy_Mutant::OnJumpEnd()
+{
+	OnJumpAttack = false;
 }
 
 void AEnemy_Mutant::SetJumpAttackFinished(FOnJumpAttackFinished NewOnJumpAttackFinished)
@@ -87,8 +110,7 @@ void AEnemy_Mutant::SetJumpAttackFinished(FOnJumpAttackFinished NewOnJumpAttackF
 
 void AEnemy_Mutant::EndJumpAttack()
 {
-	DoingJumpAttack = false;
-	Target = nullptr;
+	JA_Target = nullptr;
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 
 	OnJumpAttackFinished.ExecuteIfBound();

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "PKH/Game/BSGameInstance.h"
 #include "EquipComponent.generated.h"
 
 UENUM(BlueprintType)
@@ -34,6 +35,28 @@ protected:
 	TObjectPtr<class UPaladinAnimInstance> AnimInstance;
 
 	EWeaponType CurWeapon = EWeaponType::None;
+
+// Cur Equipment
+protected:
+	UPROPERTY(EditDefaultsOnly, category="Default")
+	int32 DefaultWeaponId = 1001;
+
+	UPROPERTY(EditDefaultsOnly, category = "Default")
+	int32 DefaultShieldId = 2001;
+
+	UPROPERTY(VisibleAnywhere)
+	FWeaponData CurWeaponData;
+
+	UPROPERTY(VisibleAnywhere)
+	FShieldData CurShieldData;
+
+	void Equip(int32 NewId);
+	void EquipWeapon(int32 NewWeaponId);
+	void EquipShield(int32 NewShieldId);
+
+public:
+	int32 GetWeaponAttackValue() const;
+	int32 GetShieldDefenceValue() const;
 
 // Attack
 protected:

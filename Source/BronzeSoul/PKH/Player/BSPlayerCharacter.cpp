@@ -259,6 +259,20 @@ void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
 }
 #pragma endregion
 
+#pragma region Equipment
+void ABSPlayerCharacter::SetWeaponMesh(TObjectPtr<UStaticMesh> NewWeaponMesh, FTransform NewTransform)
+{
+	WeaponComp->SetStaticMesh(NewWeaponMesh);
+	WeaponComp->SetRelativeTransform(NewTransform);
+}
+
+void ABSPlayerCharacter::SetShieldMesh(TObjectPtr<UStaticMesh> NewShieldMesh, FTransform NewTransform)
+{
+	ShieldComp->SetStaticMesh(NewShieldMesh);
+	ShieldComp->SetRelativeTransform(NewTransform);
+}
+#pragma endregion
+
 #pragma region PlayerState
 bool ABSPlayerCharacter::CanMove()
 {
@@ -423,7 +437,7 @@ void ABSPlayerCharacter::OnWeaponBeginOverlap(UPrimitiveComponent* OverlappedCom
 		return;
 	}
 
-	//Enemy->OnDamaged();
+	Enemy->OnDamaged(EquipComp->GetWeaponAttackValue(), 0.5f, this);
 }
 
 void ABSPlayerCharacter::CancelAttack()

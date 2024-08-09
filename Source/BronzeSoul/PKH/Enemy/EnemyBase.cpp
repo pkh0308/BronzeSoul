@@ -3,6 +3,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "PKH/CollisionProfiles.h"
 #include "PKH/AI/EnemyAIController.h"
 #include "PKH/Player/BSPlayerCharacter.h"
 #include "Runtime/AIModule/Classes/AIController.h"
@@ -13,6 +14,8 @@ AEnemyBase::AEnemyBase()
 
 	GetMesh()->SetRelativeLocation(FVector(0, 0, -90));
 	GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
+
+	GetCapsuleComponent()->SetCollisionProfileName(COLLISION_ENEMY);
 
 	static ConstructorHelpers::FClassFinder<AAIController> AIControllerRef(TEXT("/Game/PKH/Enemy/BP_EnemyAIController.BP_EnemyAIController_C"));
 	if(AIControllerRef.Class)
@@ -29,12 +32,8 @@ void AEnemyBase::BeginPlay()
 	EnemyController = CastChecked<AEnemyAIController>(GetController());
 	RunAI();
 
-	// Test
-	FTimerHandle DieHandle;
-	GetWorldTimerManager().SetTimer(DieHandle, FTimerDelegate::CreateLambda([this]()
-	{
-		SetHp(0);
-	}), 5.0f, false);
+	// Initialize
+	SetHp(MaxHp);
 }
 
 #pragma region AI
@@ -79,7 +78,7 @@ void AEnemyBase::SetHp(int32 NewHp)
 void AEnemyBase::OnDamaged(int32 InDamage, float StaggerTime, AActor* Attacker)
 {
 	SetState(EEnemyState::Damaged);
-	SetHp(CurHp - InDamage);
+	SetHp(CurHp - InDamage); UE_LOG(LogTemp, Warning, TEXT("[AEnemyBase::OnDamaged] %d"), CurHp);
 
 	// Reset Timer if already timer in active
 	if(GetWorldTimerManager().IsTimerActive(StaggerHandle))
