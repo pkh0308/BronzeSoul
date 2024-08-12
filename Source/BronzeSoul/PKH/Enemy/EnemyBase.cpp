@@ -2,10 +2,12 @@
 #include "PKH/Enemy/EnemyBase.h"
 
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PKH/CollisionProfiles.h"
 #include "PKH/AI/EnemyAIController.h"
 #include "PKH/Player/BSPlayerCharacter.h"
+#include "PKH/UI/EnemyHpWidget.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 
 AEnemyBase::AEnemyBase()
@@ -23,6 +25,17 @@ AEnemyBase::AEnemyBase()
 		AIControllerClass = AIControllerRef.Class;
 		AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	}
+
+	HealthUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HpUI"));
+	HealthUIComponent->SetupAttachment(GetCapsuleComponent());
+	HealthUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	HealthUIComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HealthUIComponent->SetDrawSize(FVector2D(150, 25));
+	static ConstructorHelpers::FClassFinder<UEnemyHpWidget> HpUIRef(TEXT("/Game/PKH/UI/BP_EnemyHp.BP_EnemyHp_C"));
+	if( HpUIRef.Class )
+	{
+		HealthUIComponent->SetWidgetClass(HpUIRef.Class);
+	}
 }
 
 void AEnemyBase::BeginPlay()
@@ -32,7 +45,14 @@ void AEnemyBase::BeginPlay()
 	EnemyController = CastChecked<AEnemyAIController>(GetController());
 	RunAI();
 
-	// Initialize
+	// UI
+	HealthUIComponent->InitWidget();
+	if( UEnemyHpWidget* HpUI = Cast<UEnemyHpWidget>(HealthUIComponent->GetWidget()) )
+	{
+		OnHpChanged.AddDynamic(HpUI, &UEnemyHpWidget::OnHpChanged);
+	}
+
+	// Initialize Stat
 	SetHp(MaxHp);
 }
 
@@ -58,7 +78,10 @@ void AEnemyBase::SetState(EEnemyState NewState)
 #pragma region Hp
 void AEnemyBase::StaggerOff()
 {
-	SetState(EEnemyState::Idle);
+	if(false == IsDead())
+	{
+		SetState(EEnemyState::Idle);
+	}
 }
 
 void AEnemyBase::SetHp(int32 NewHp)
@@ -77,8 +100,17 @@ void AEnemyBase::SetHp(int32 NewHp)
 
 void AEnemyBase::OnDamaged(int32 InDamage, float StaggerTime, AActor* Attacker)
 {
+	// 무적 여부 검사
+	// 피격 후 InvincibleTime만큼 무적 부여
+	if(IsInvincible)
+	{
+		return;
+	}
+	IsInvincible = true;
+	GetWorldTimerManager().SetTimer(InvincibleHandle, this, &AEnemyBase::InvincibleOff, InvincibleTime, false);
+
 	SetState(EEnemyState::Damaged);
-	SetHp(CurHp - InDamage); UE_LOG(LogTemp, Warning, TEXT("[AEnemyBase::OnDamaged] %d"), CurHp);
+	SetHp(CurHp - InDamage);
 
 	// Reset Timer if already timer in active
 	if(GetWorldTimerManager().IsTimerActive(StaggerHandle))
@@ -92,6 +124,11 @@ void AEnemyBase::OnDamaged(int32 InDamage, float StaggerTime, AActor* Attacker)
 		EnemyController->SetKey_Player(Attacker);
 	}
 }
+
+void AEnemyBase::InvincibleOff()
+{
+	IsInvincible = false;
+}
 #pragma endregion
 
 #pragma region Attack
@@ -102,7 +139,7 @@ int32 AEnemyBase::GetEnemyAtk() const
 
 void AEnemyBase::Attack()
 {
-	UE_LOG(LogTemp, Log, TEXT("[EnemyBase::Attack] Attack"))
+	
 }
 #pragma endregion
 
@@ -136,6 +173,7 @@ void AEnemyBase::HideMesh()
 	GetWorldTimerManager().SetTimer(HideMeshHandle, FTimerDelegate::CreateLambda([this]()
 	{
 		GetMesh()->SetHiddenInGame(true);
+		HealthUIComponent->GetWidget()->SetVisibility(ESlateVisibility::Hidden);
 	}), MeshHideDelay, false);
 }
 #pragma endregion

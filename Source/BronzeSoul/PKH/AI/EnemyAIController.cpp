@@ -68,7 +68,6 @@ void AEnemyAIController::StopAI()
 #pragma region AI Perception
 void AEnemyAIController::OnSightUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	UE_LOG(LogTemp, Log, TEXT("[AEnemyAIController::OnSightUpdated] OnSightUpdated"));
 	if (false == Actor->IsA<ABSPlayerCharacter>())
 	{
 		return;
@@ -83,7 +82,6 @@ void AEnemyAIController::OnSightUpdated(AActor* Actor, FAIStimulus Stimulus)
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		BBComp->SetValueAsObject(KEY_PLAYER, Actor);
-		UE_LOG(LogTemp, Log, TEXT("[AEnemyAIController::OnSightUpdated] Player In Sight"));
 
 		if (GetWorldTimerManager().IsTimerActive(SightHandle))
 		{

@@ -123,5 +123,6 @@ void AEnemy_Mutant::OnDie()
 	Super::OnDie();
 
 	MyAnimInstance->PlayMontage_Die();
+	WaitingJumpAttack = false;
 }
 #pragma endregion

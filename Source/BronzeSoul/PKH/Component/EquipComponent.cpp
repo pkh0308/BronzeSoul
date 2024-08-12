@@ -89,7 +89,6 @@ void UEquipComponent::DoCombo()
 
 	DisableCombo();
 	AnimInstance->PlayMontage_Combo(++CurCombo);
-	UE_LOG(LogTemp, Log, TEXT("[EquipComponent] Combo %d"), CurCombo);
 }
 
 void UEquipComponent::EnableCombo()

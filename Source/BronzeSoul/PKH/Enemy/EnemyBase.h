@@ -60,6 +60,18 @@ protected:
 
 	void SetHp(int32 NewHp);
 
+	// 피격 시 일정시간 무적 처리
+	UPROPERTY(EditDefaultsOnly)
+	float InvincibleTime = 0.2f;
+
+	UPROPERTY(VisibleAnywhere)
+	bool IsInvincible = false;
+
+	FTimerHandle InvincibleHandle;
+
+	UFUNCTION()
+	void InvincibleOff();
+
 public:
 	FOnEnemyHpChanged OnHpChanged;
 
@@ -100,4 +112,9 @@ public:
 	bool IsDead() const;
 
 	void HideMesh();
+
+// UI
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UWidgetComponent> HealthUIComponent;
 };
