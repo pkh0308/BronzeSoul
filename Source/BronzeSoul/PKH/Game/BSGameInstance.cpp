@@ -25,8 +25,10 @@ UBSGameInstance::UBSGameInstance()
 	Shield_2001.Id = 2001;
 	Shield_2001.DefenceValue = 10;
 	Shield_2001.StaminaCost = 10;
-	Shield_2001.RelativeTransform = FTransform();
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh_2001Ref(TEXT("/Script/Engine.StaticMesh'/Game/PKH/Weapon/OneHand/Worn_Sword_FBX.Worn_Sword_FBX'"));
+	Shield_2001.RelativeTransform.SetLocation(FVector(0, -7.49f, -2.51f));
+	Shield_2001.RelativeTransform.SetRotation(FQuat(FRotator(15, -90, -90))); 
+	Shield_2001.RelativeTransform.SetScale3D(FVector(0.2f));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh_2001Ref(TEXT("/Script/Engine.StaticMesh'/Game/PKH/Shield/WoodShield/Viking_shield.Viking_shield'"));
 	if ( Mesh_2001Ref.Object )
 	{
 		Shield_2001.Mesh = Mesh_2001Ref.Object;

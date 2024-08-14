@@ -173,7 +173,10 @@ void AEnemyBase::HideMesh()
 	GetWorldTimerManager().SetTimer(HideMeshHandle, FTimerDelegate::CreateLambda([this]()
 	{
 		GetMesh()->SetHiddenInGame(true);
-		HealthUIComponent->GetWidget()->SetVisibility(ESlateVisibility::Hidden);
+		if( HealthUIComponent->GetWidget() )
+		{
+			HealthUIComponent->GetWidget()->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}), MeshHideDelay, false);
 }
 #pragma endregion

@@ -7,7 +7,6 @@
 
 UEnemyHpWidget::UEnemyHpWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	
 }
 
 void UEnemyHpWidget::NativeConstruct()
