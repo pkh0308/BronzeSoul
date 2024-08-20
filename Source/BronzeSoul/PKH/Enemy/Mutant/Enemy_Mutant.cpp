@@ -3,6 +3,7 @@
 
 #include "PKH/Enemy/Mutant/Enemy_Mutant.h"
 
+#include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PKH/AI/EnemyAIController.h"
 #include "PKH/Animation/Enemy/MutantAnimInstance.h"
@@ -10,6 +11,18 @@
 AEnemy_Mutant::AEnemy_Mutant()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	// 공격 판정 컴포넌트 추가
+	NormalAttackColl = CreateDefaultSubobject<UBoxComponent>(TEXT("NormalAttackColl"));
+	NormalAttackColl->SetupAttachment(GetMesh(), TEXT("Socket_NormalAttack"));
+	NormalAttackColl->SetRelativeLocation(FVector());
+	NormalAttackColl->SetRelativeRotation(FRotator());
+	NormalAttackColl->SetBoxExtent(FVector(20));
+	JumpAttackColl = CreateDefaultSubobject<UBoxComponent>(TEXT("JumpAttackColl"));
+	JumpAttackColl->SetupAttachment(GetMesh(), TEXT("Socket_JumpAttack"));
+	JumpAttackColl->SetRelativeLocation(FVector());
+	JumpAttackColl->SetRelativeRotation(FRotator());
+	JumpAttackColl->SetBoxExtent(FVector(80, 10, 80));
 
 	// 메시 위치 조정
 	GetMesh()->AddRelativeLocation(FVector(-14, 0, 0));
@@ -35,6 +48,8 @@ void AEnemy_Mutant::BeginPlay()
 
 	// Initialize
 	SetEnemyWalk();
+	SetNormalAttackColl(false);
+	SetJumpAttackColl(false);
 }
 
 void AEnemy_Mutant::Tick(float DeltaSeconds)
@@ -60,6 +75,18 @@ void AEnemy_Mutant::Attack()
 	Super::Attack();
 
 	MyAnimInstance->PlayMontage_Attack();
+}
+
+void AEnemy_Mutant::SetNormalAttackColl(bool IsActive)
+{
+	if(IsActive )
+	{
+		NormalAttackColl->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	else
+	{
+		NormalAttackColl->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 #pragma endregion
 
@@ -106,6 +133,18 @@ void AEnemy_Mutant::OnJumpEnd()
 void AEnemy_Mutant::SetJumpAttackFinished(FOnJumpAttackFinished NewOnJumpAttackFinished)
 {
 	OnJumpAttackFinished = NewOnJumpAttackFinished;
+}
+
+void AEnemy_Mutant::SetJumpAttackColl(bool IsActive)
+{
+	if ( IsActive )
+	{
+		JumpAttackColl->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	else
+	{
+		JumpAttackColl->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AEnemy_Mutant::EndJumpAttack()

@@ -32,8 +32,17 @@ private:
 protected:
 	virtual void Attack() override;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UBoxComponent> NormalAttackColl;
+
+public:
+	void SetNormalAttackColl(bool IsActive);
+
 // Jump Attack
 protected:
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UBoxComponent> JumpAttackColl;
+
 	FOnJumpAttackFinished OnJumpAttackFinished;
 
 	bool WaitingJumpAttack;
@@ -62,6 +71,8 @@ public:
 	void OnJumpEnd();
 
 	void SetJumpAttackFinished(FOnJumpAttackFinished NewOnJumpAttackFinished);
+
+	void SetJumpAttackColl(bool IsActive);
 
 	void EndJumpAttack();
 
