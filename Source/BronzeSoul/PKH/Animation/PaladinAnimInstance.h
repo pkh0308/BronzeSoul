@@ -63,6 +63,15 @@ protected:
 	TObjectPtr<class UAnimMontage> AM_Guard;
 
 	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAnimMontage> AM_Damaged;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAnimMontage> AM_KnockDown;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAnimMontage> AM_StandUp;
+
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UAnimMontage> AM_Die;
 
 public:
@@ -72,9 +81,22 @@ public:
 
 	void PlayMontage_Guard();
 
+	void PlayMontage_Damaged();
+
+	void PlayMontage_KnockDown();
+
+	void PlayMontage_StandUp();
+
 	void PlayMontage_Die();
 
-// Guard
+// Texts
 protected:
+	// Guard
+	UPROPERTY(EditDefaultsOnly)
 	FName GuardOff = TEXT("GuardOff");
+
+	// Damaged
+	UPROPERTY(EditDefaultsOnly)
+	TArray<FName> DamagedSections;
+
 };

@@ -210,6 +210,7 @@ void ABSPlayerCharacter::GuardOn(const FInputActionValue& InputAction)
 	SetShieldCollision(true);
 	//AnimInstance->PlayMontage_Guard();
 	MoveComp->bOrientRotationToMovement = false;
+	SetPlayerWalk();
 }
 
 void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
@@ -225,6 +226,7 @@ void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
 	SetShieldCollision(false);
 	//AnimInstance->PlayMontage_Guard();
 	MoveComp->bOrientRotationToMovement = true;
+	SetPlayerRun();
 }
 
 void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
@@ -311,6 +313,10 @@ bool ABSPlayerCharacter::CanDodge()
 
 void ABSPlayerCharacter::SetState(EPlayerState NewState)
 {
+	if(CurState == EPlayerState::Die)
+	{
+		return;
+	}
 	CurState = NewState;
 
 	switch(CurState)
@@ -371,17 +377,33 @@ void ABSPlayerCharacter::SetHp(int32 NewHp)
 	}
 }
 
-void ABSPlayerCharacter::OnDamaged(int32 InDamage, float StaggerTime)
+void ABSPlayerCharacter::OnDamaged(int32 InDamage, int32 InKnockDamage)
 {
-	SetState(EPlayerState::Damaged);
-	SetHp(CurHp - InDamage);
-
-	// Reset Timer if already timer in active
-	if (GetWorldTimerManager().IsTimerActive(StaggerHandle))
+	// 넉다운 상태에서 피격 시 바로 기상
+	if(CurState == EPlayerState::KnockDown)
 	{
-		GetWorldTimerManager().ClearTimer(StaggerHandle);
+		StandUp();
 	}
-	GetWorldTimerManager().SetTimer(StaggerHandle, this, &ABSPlayerCharacter::StaggerOff, StaggerTime, false);
+	else
+	{
+		SetState(EPlayerState::Damaged);
+		AddKnockDamage(InKnockDamage);
+	}
+	SetHp(CurHp - InDamage);
+	if (CurState != EPlayerState::KnockDown && CurState != EPlayerState::Die )
+	{
+		AnimInstance->PlayMontage_Damaged();
+	}
+}
+
+void ABSPlayerCharacter::OnDamagedEnd()
+{
+	if(CurState == EPlayerState::KnockDown || CurState == EPlayerState::Die)
+	{
+		return;
+	}
+
+	SetState(EPlayerState::Idle);
 }
 
 int32 ABSPlayerCharacter::GetCurHp() const
@@ -427,9 +449,63 @@ bool ABSPlayerCharacter::UseStamina(int32 RequiredStamina)
 }
 #pragma endregion
 
+#pragma region Speed
+void ABSPlayerCharacter::SetPlayerWalk()
+{
+	MoveComp->MaxWalkSpeed = WalkSpeed;
+}
+
+void ABSPlayerCharacter::SetPlayerRun()
+{
+	MoveComp->MaxWalkSpeed = RunSpeed;
+}
+#pragma endregion
+
+#pragma region KnockDown
+void ABSPlayerCharacter::AddKnockDamage(int32 InKnockDamage)
+{
+	CurKnockDown += FMath::Clamp(InKnockDamage, 0, MaxKnockDown);
+	if ( CurKnockDown == MaxKnockDown )
+	{
+		KnockDown();
+		return;
+	}
+	
+	// 실행중인 넉다운 게이지 회복 중지 및 타이머 재설정
+	FTimerManager& TM = GetWorldTimerManager();
+	if ( TM.IsTimerActive(KnockDownHandle) )
+	{
+		TM.ClearTimer(KnockDownHandle);
+	}
+	TM.SetTimer(KnockDownHandle, this, &ABSPlayerCharacter::RecoverKnockDamage, DeltaTime_KnockRecovery, true, Delay_KnockRecovery);
+}
+
+void ABSPlayerCharacter::RecoverKnockDamage()
+{
+	CurKnockDown = FMath::Clamp(CurKnockDown - DeltaVal_KnockRecovery, 0, MaxKnockDown);
+	if (CurKnockDown == 0)
+	{
+		GetWorldTimerManager().ClearTimer(KnockDownHandle);
+	}
+}
+
+void ABSPlayerCharacter::KnockDown()
+{
+	SetState(EPlayerState::KnockDown);
+	CurKnockDown = 0;
+	AnimInstance->PlayMontage_KnockDown();
+}
+
+void ABSPlayerCharacter::StandUp()
+{
+	SetState(EPlayerState::Idle);
+	AnimInstance->PlayMontage_StandUp();
+}
+#pragma endregion
+
 #pragma region Attack
 void ABSPlayerCharacter::OnWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-											  int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                              int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor);
 	if(nullptr == Enemy)

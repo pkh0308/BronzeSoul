@@ -5,24 +5,29 @@
 
 #include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "PKH/CollisionProfiles.h"
 #include "PKH/AI/EnemyAIController.h"
 #include "PKH/Animation/Enemy/MutantAnimInstance.h"
+#include "PKH/Player/BSPlayerCharacter.h"
 
 AEnemy_Mutant::AEnemy_Mutant()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 공격 판정 컴포넌트 추가
+	// 일반 공격 판정 컴포넌트 추가
 	NormalAttackColl = CreateDefaultSubobject<UBoxComponent>(TEXT("NormalAttackColl"));
 	NormalAttackColl->SetupAttachment(GetMesh(), TEXT("Socket_NormalAttack"));
-	NormalAttackColl->SetRelativeLocation(FVector());
-	NormalAttackColl->SetRelativeRotation(FRotator());
-	NormalAttackColl->SetBoxExtent(FVector(20));
+	NormalAttackColl->SetCollisionProfileName(COLLISION_ENEMY_ATTACK);
+	NormalAttackColl->SetRelativeLocation(FVector(-12, -52, 0));
+	NormalAttackColl->SetBoxExtent(FVector(30));
+	NormalAttackColl->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Mutant::NormalAttack);
+	// 점프 공격 판정 컴포넌트 추가
 	JumpAttackColl = CreateDefaultSubobject<UBoxComponent>(TEXT("JumpAttackColl"));
 	JumpAttackColl->SetupAttachment(GetMesh(), TEXT("Socket_JumpAttack"));
-	JumpAttackColl->SetRelativeLocation(FVector());
-	JumpAttackColl->SetRelativeRotation(FRotator());
+	JumpAttackColl->SetCollisionProfileName(COLLISION_ENEMY_ATTACK);
+	JumpAttackColl->SetRelativeLocation(FVector(0, -14, 76));
 	JumpAttackColl->SetBoxExtent(FVector(80, 10, 80));
+	JumpAttackColl->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Mutant::JumpAttack);
 
 	// 메시 위치 조정
 	GetMesh()->AddRelativeLocation(FVector(-14, 0, 0));
@@ -88,9 +93,33 @@ void AEnemy_Mutant::SetNormalAttackColl(bool IsActive)
 		NormalAttackColl->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
+
+void AEnemy_Mutant::NormalAttack(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+	                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ABSPlayerCharacter* Player = Cast<ABSPlayerCharacter>(OtherActor);
+	if(nullptr == OtherActor)
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("[AEnemy_Mutant::NormalAttack] "));
+	Player->OnDamaged(20, 400); // 임시값
+}
 #pragma endregion
 
 #pragma region Jump Attack
+void AEnemy_Mutant::JumpAttack(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ABSPlayerCharacter* Player = Cast<ABSPlayerCharacter>(OtherActor);
+	if ( nullptr == OtherActor )
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("[AEnemy_Mutant::JumpAttack] "));
+	Player->OnDamaged(50, 1200); // 임시값
+}
+
 bool AEnemy_Mutant::IsWaitingJumpAttack()
 {
 	return WaitingJumpAttack;

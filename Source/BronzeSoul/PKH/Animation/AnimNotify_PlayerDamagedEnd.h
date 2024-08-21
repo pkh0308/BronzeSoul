@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "AnimNotify_MutantAttackBegin.generated.h"
+#include "AnimNotify_PlayerDamagedEnd.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BRONZESOUL_API UAnimNotify_MutantAttackBegin : public UAnimNotify
+class BRONZESOUL_API UAnimNotify_PlayerDamagedEnd : public UAnimNotify
 {
 	GENERATED_BODY()
 

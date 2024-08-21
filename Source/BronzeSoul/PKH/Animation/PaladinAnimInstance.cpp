@@ -26,11 +26,33 @@ UPaladinAnimInstance::UPaladinAnimInstance()
 		AM_Guard = AM_GuardRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_DamagedRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin_RootAdded/Blueprint/AM_Damaged.AM_Damaged'"));
+	if ( AM_DamagedRef.Object )
+	{
+		AM_Damaged = AM_DamagedRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_KnockDownRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin_RootAdded/Blueprint/AM_KnockDown.AM_KnockDown'"));
+	if ( AM_KnockDownRef.Object )
+	{
+		AM_KnockDown = AM_KnockDownRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_StandUpRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin_RootAdded/Blueprint/AM_StandUp.AM_StandUp'"));
+	if ( AM_StandUpRef.Object )
+	{
+		AM_StandUp = AM_StandUpRef.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_DieRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin_RootAdded/Blueprint/AM_Die.AM_Die'"));
 	if ( AM_DieRef.Object )
 	{
 		AM_Die = AM_DieRef.Object;
 	}
+
+	// Texts
+	DamagedSections.Add(TEXT("Damaged_1"));
+	DamagedSections.Add(TEXT("Damaged_2"));
 }
 
 void UPaladinAnimInstance::NativeInitializeAnimation()
@@ -77,6 +99,7 @@ void UPaladinAnimInstance::PlayMontage_Combo(int32 Idx)
 }
 #pragma endregion
 
+#pragma region Montage
 void UPaladinAnimInstance::PlayMontage_Dodge()
 {
 	Montage_Play(AM_Dodge);
@@ -95,7 +118,27 @@ void UPaladinAnimInstance::PlayMontage_Guard()
 	}
 }
 
+void UPaladinAnimInstance::PlayMontage_Damaged()
+{
+	// 몽타주 내 랜덤 애니메이션 재생
+	const int32 RandIdx = FMath::RandRange(0, 1);
+	Montage_Play(AM_Damaged);
+	Montage_JumpToSection(DamagedSections[RandIdx]);
+}
+
+void UPaladinAnimInstance::PlayMontage_KnockDown()
+{
+	Montage_Play(AM_KnockDown);
+}
+
+void UPaladinAnimInstance::PlayMontage_StandUp()
+{
+	Montage_Play(AM_StandUp);
+}
+
 void UPaladinAnimInstance::PlayMontage_Die()
 {
 	Montage_Play(AM_Die);
 }
+#pragma endregion
+

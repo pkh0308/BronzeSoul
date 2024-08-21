@@ -19,6 +19,7 @@ enum class EPlayerState : uint8
 	Guard,
 	Dodge,
 	Damaged,
+	KnockDown,
 	Die
 };
 
@@ -160,7 +161,9 @@ public:
 
 	int32 GetCurHp() const;
 
-	void OnDamaged(int32 InDamage, float StaggerTime);
+	void OnDamaged(int32 InDamage, int32 InKnockDamage);
+
+	void OnDamagedEnd();
 
 	void OnDie();
 
@@ -191,6 +194,47 @@ public:
 	int32 GetCurStamina() const;
 
 	bool UseStamina(int32 RequiredStamina);
+
+// Speed
+protected:
+	UPROPERTY(EditAnywhere, Category="Speed")
+	int32 WalkSpeed = 200;
+
+	UPROPERTY(EditAnywhere, Category = "Speed")
+	int32 RunSpeed = 500;
+
+public:
+	void SetPlayerWalk();
+	void SetPlayerRun();
+
+// KnockDown
+protected:
+	UPROPERTY(EditAnywhere, Category = "KnockDown")
+	int32 CurKnockDown;
+
+	UPROPERTY(EditAnywhere, Category = "KnockDown")
+	int32 MaxKnockDown = 1000;
+
+	UPROPERTY(EditAnywhere, Category = "KnockDown")
+	float Delay_KnockRecovery = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "KnockDown")
+	float DeltaTime_KnockRecovery = 0.1f;
+
+	UPROPERTY(EditAnywhere, Category = "KnockDown")
+	int32 DeltaVal_KnockRecovery = 20;
+
+	FTimerHandle KnockDownHandle;
+
+	UFUNCTION()
+	void RecoverKnockDamage();
+
+	void KnockDown();
+
+public:
+	void AddKnockDamage(int32 InKnockDamage);
+
+	void StandUp();
 
 // Attack
 protected:

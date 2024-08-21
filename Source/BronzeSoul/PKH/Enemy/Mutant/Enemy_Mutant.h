@@ -35,6 +35,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UBoxComponent> NormalAttackColl;
 
+	UFUNCTION()
+	void NormalAttack(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, 
+		              const FHitResult& SweepResult);
+
 public:
 	void SetNormalAttackColl(bool IsActive);
 
@@ -59,6 +63,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, category = "JumpAttack")
 	FVector JA_TargetDir;
+
+	UFUNCTION()
+	void JumpAttack(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+						  const FHitResult& SweepResult);
 
 public:
 	bool IsWaitingJumpAttack();
