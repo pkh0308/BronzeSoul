@@ -207,10 +207,7 @@ void ABSPlayerCharacter::GuardOn(const FInputActionValue& InputAction)
 	SetState(EPlayerState::Guard);
 	UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::GuardOn] Guard On %d"), OnGuardNow());
 
-	SetShieldCollision(true);
-	//AnimInstance->PlayMontage_Guard();
-	MoveComp->bOrientRotationToMovement = false;
-	SetPlayerWalk();
+	SetGuard(true);
 }
 
 void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
@@ -223,10 +220,7 @@ void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
 	SetState(EPlayerState::Idle);
 	UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::GuardOff] Guard Off %d"), OnGuardNow());
 
-	SetShieldCollision(false);
-	//AnimInstance->PlayMontage_Guard();
-	MoveComp->bOrientRotationToMovement = true;
-	SetPlayerRun();
+	SetGuard(false);
 }
 
 void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
@@ -379,13 +373,23 @@ void ABSPlayerCharacter::SetHp(int32 NewHp)
 
 void ABSPlayerCharacter::OnDamaged(int32 InDamage, int32 InKnockDamage)
 {
+	if(IsDead())
+	{
+		return;
+	}
+
 	// 넉다운 상태에서 피격 시 바로 기상
-	if(CurState == EPlayerState::KnockDown)
+	if ( CurState == EPlayerState::KnockDown )
 	{
 		StandUp();
 	}
 	else
 	{
+		// 가드 상태에서 방어 실패 시 가드상태 해제
+		if ( CurState == EPlayerState::Guard )
+		{
+			SetGuard(false);
+		}
 		SetState(EPlayerState::Damaged);
 		AddKnockDamage(InKnockDamage);
 	}
@@ -546,6 +550,24 @@ int32 ABSPlayerCharacter::GetPlayerAtk() const
 #pragma endregion
 
 #pragma region Guard
+void ABSPlayerCharacter::SetGuard(bool ActiveGuard)
+{
+	if(ActiveGuard)
+	{
+		SetShieldCollision(true);
+		//AnimInstance->PlayMontage_Guard();
+		MoveComp->bOrientRotationToMovement = false;
+		SetPlayerWalk();
+	}
+	else
+	{
+		SetShieldCollision(false);
+		//AnimInstance->PlayMontage_Guard();
+		MoveComp->bOrientRotationToMovement = true;
+		SetPlayerRun();
+	}
+}
+
 void ABSPlayerCharacter::OnShieldBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

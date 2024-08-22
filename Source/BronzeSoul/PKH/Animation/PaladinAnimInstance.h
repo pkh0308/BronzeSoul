@@ -6,6 +6,16 @@
 #include "Animation/AnimInstance.h"
 #include "PaladinAnimInstance.generated.h"
 
+UENUM(BlueprintType)
+enum class EPlayerDir : uint8
+{
+	Idle = 0,
+	Left,
+	Right,
+	Forward,
+	Backward
+};
+
 /**
  * 
  */
@@ -50,6 +60,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 RunThreshold = 250;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EPlayerDir PlayerDir;
 
 // Montages
 protected:

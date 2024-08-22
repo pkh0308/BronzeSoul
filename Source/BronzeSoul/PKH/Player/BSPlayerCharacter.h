@@ -117,6 +117,9 @@ protected:
 protected:
 	FVector DirVec;
 
+public:
+	FORCEINLINE FVector GetDirectionVec() const { return DirVec; }
+
 // Equipment
 public:
 	void SetWeaponMesh(TObjectPtr<class UStaticMesh> NewWeaponMesh, FTransform NewTransform);
@@ -265,6 +268,8 @@ protected:
 	UFUNCTION()
 	void OnShieldBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 									  const FHitResult& SweepResult);
+
+	void SetGuard(bool ActiveGuard);
 
 public:
 	void SetShieldCollision(bool CurGuard);

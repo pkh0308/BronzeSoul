@@ -61,3 +61,10 @@ void UMutantAnimInstance::PlayMontage_Die()
 	Montage_Play(Montage_Die);
 }
 #pragma endregion
+
+#pragma region Section Check
+bool UMutantAnimInstance::IsLeftHand() const
+{
+	return Montage_GetCurrentSection() == MontageSection_Combo2;
+}
+#pragma endregion

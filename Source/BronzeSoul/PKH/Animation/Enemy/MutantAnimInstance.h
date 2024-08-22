@@ -45,4 +45,12 @@ public:
 	void PlayMontage_Attack();
 	void PlayMontage_JumpAttack();
 	void PlayMontage_Die();
+
+// Section Check
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	FName MontageSection_Combo2 = TEXT("Combo_2");
+
+public:
+	bool IsLeftHand() const;
 };

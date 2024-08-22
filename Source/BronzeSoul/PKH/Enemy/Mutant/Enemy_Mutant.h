@@ -33,14 +33,17 @@ protected:
 	virtual void Attack() override;
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<class UBoxComponent> NormalAttackColl;
+	TObjectPtr<class UBoxComponent> LeftAttackColl;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UBoxComponent> RightAttackColl;
 
 	UFUNCTION()
 	void NormalAttack(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, 
 		              const FHitResult& SweepResult);
 
 public:
-	void SetNormalAttackColl(bool IsActive);
+	void SetNormalAttackColl(bool IsActive, bool IsLeft);
 
 // Jump Attack
 protected:

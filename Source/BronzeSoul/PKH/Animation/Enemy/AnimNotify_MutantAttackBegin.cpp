@@ -3,6 +3,7 @@
 
 #include "PKH/Animation/Enemy/AnimNotify_MutantAttackBegin.h"
 
+#include "MutantAnimInstance.h"
 #include "PKH/Enemy/Mutant/Enemy_Mutant.h"
 
 void UAnimNotify_MutantAttackBegin::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
@@ -11,8 +12,22 @@ void UAnimNotify_MutantAttackBegin::Notify(USkeletalMeshComponent* MeshComp, UAn
 	Super::Notify(MeshComp, Animation, EventReference);
 
 	AEnemy_Mutant* Mutant = Cast<AEnemy_Mutant>(MeshComp->GetOwner());
-	if(Mutant)
+	if(nullptr == Mutant)
 	{
-		Mutant->SetNormalAttackColl(true);
+		return;
 	}
+
+	UAnimInstance* Anim = Cast<UAnimInstance>(Mutant->GetMesh()->GetAnimInstance());
+	if(nullptr == Anim)
+	{
+		return;
+	}
+
+	UMutantAnimInstance* MutantAnim = Cast<UMutantAnimInstance>(Anim);
+	if(nullptr == MutantAnim)
+	{
+		return;
+	}
+
+	Mutant->SetNormalAttackColl(true, MutantAnim->IsLeftHand());
 }

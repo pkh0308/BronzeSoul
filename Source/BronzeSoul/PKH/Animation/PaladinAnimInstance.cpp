@@ -82,6 +82,17 @@ void UPaladinAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsRunning = Velocity.Size2D() > RunThreshold;
 	bIsDead = Player->IsDead();
 	bOnGuard = Player->OnGuardNow();
+
+	// 방향
+	const FVector& DirVec = Player->GetDirectionVec();
+	if(DirVec.Y != 0)
+	{
+		PlayerDir = DirVec.Y > 0 ? EPlayerDir::Right : EPlayerDir::Left;
+	}
+	else
+	{
+		PlayerDir = DirVec.X > 0 ? EPlayerDir::Forward : EPlayerDir::Backward;
+	}
 }
 
 #pragma region Combo

@@ -15,12 +15,19 @@ AEnemy_Mutant::AEnemy_Mutant()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// 일반 공격 판정 컴포넌트 추가
-	NormalAttackColl = CreateDefaultSubobject<UBoxComponent>(TEXT("NormalAttackColl"));
-	NormalAttackColl->SetupAttachment(GetMesh(), TEXT("Socket_NormalAttack"));
-	NormalAttackColl->SetCollisionProfileName(COLLISION_ENEMY_ATTACK);
-	NormalAttackColl->SetRelativeLocation(FVector(-12, -52, 0));
-	NormalAttackColl->SetBoxExtent(FVector(30));
-	NormalAttackColl->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Mutant::NormalAttack);
+	RightAttackColl = CreateDefaultSubobject<UBoxComponent>(TEXT("RightAttackColl"));
+	RightAttackColl->SetupAttachment(GetMesh(), TEXT("Socket_RightAttack"));
+	RightAttackColl->SetCollisionProfileName(COLLISION_ENEMY_ATTACK);
+	RightAttackColl->SetRelativeLocation(FVector(2, -40, 0));
+	RightAttackColl->SetBoxExtent(FVector(20, 30, 20));
+	RightAttackColl->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Mutant::NormalAttack);
+
+	LeftAttackColl = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftAttackColl"));
+	LeftAttackColl->SetupAttachment(GetMesh(), TEXT("Socket_LeftAttack"));
+	LeftAttackColl->SetCollisionProfileName(COLLISION_ENEMY_ATTACK);
+	LeftAttackColl->SetRelativeLocation(FVector(-12, -52, 0));
+	LeftAttackColl->SetBoxExtent(FVector(30));
+	LeftAttackColl->OnComponentBeginOverlap.AddDynamic(this, &AEnemy_Mutant::NormalAttack);
 	// 점프 공격 판정 컴포넌트 추가
 	JumpAttackColl = CreateDefaultSubobject<UBoxComponent>(TEXT("JumpAttackColl"));
 	JumpAttackColl->SetupAttachment(GetMesh(), TEXT("Socket_JumpAttack"));
@@ -53,7 +60,8 @@ void AEnemy_Mutant::BeginPlay()
 
 	// Initialize
 	SetEnemyWalk();
-	SetNormalAttackColl(false);
+	SetNormalAttackColl(false, true);
+	SetNormalAttackColl(false, false);
 	SetJumpAttackColl(false);
 }
 
@@ -82,15 +90,29 @@ void AEnemy_Mutant::Attack()
 	MyAnimInstance->PlayMontage_Attack();
 }
 
-void AEnemy_Mutant::SetNormalAttackColl(bool IsActive)
+void AEnemy_Mutant::SetNormalAttackColl(bool IsActive, bool IsLeft)
 {
 	if(IsActive )
 	{
-		NormalAttackColl->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		if(IsLeft)
+		{
+			LeftAttackColl->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		else
+		{
+			RightAttackColl->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
 	}
 	else
 	{
-		NormalAttackColl->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if ( IsLeft )
+		{
+			LeftAttackColl->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+		else
+		{
+			RightAttackColl->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
 	}
 }
 
