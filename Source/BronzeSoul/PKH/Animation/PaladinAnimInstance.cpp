@@ -26,6 +26,12 @@ UPaladinAnimInstance::UPaladinAnimInstance()
 		AM_Guard = AM_GuardRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_GuardImpactRef(TEXT(""));
+	if ( AM_GuardImpactRef.Object )
+	{
+		AM_GuardImpact = AM_GuardImpactRef.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_DamagedRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin_RootAdded/Blueprint/AM_Damaged.AM_Damaged'"));
 	if ( AM_DamagedRef.Object )
 	{
@@ -127,6 +133,11 @@ void UPaladinAnimInstance::PlayMontage_Guard()
 		Montage_Play(AM_Guard);
 		Montage_JumpToSection(GuardOff);
 	}
+}
+
+void UPaladinAnimInstance::PlayMontage_GuardImpact()
+{
+	Montage_Play(AM_GuardImpact);
 }
 
 void UPaladinAnimInstance::PlayMontage_Damaged()

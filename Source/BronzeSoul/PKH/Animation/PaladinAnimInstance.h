@@ -76,6 +76,9 @@ protected:
 	TObjectPtr<class UAnimMontage> AM_Guard;
 
 	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAnimMontage> AM_GuardImpact;
+
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UAnimMontage> AM_Damaged;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -93,6 +96,8 @@ public:
 	void PlayMontage_Dodge();
 
 	void PlayMontage_Guard();
+
+	void PlayMontage_GuardImpact();
 
 	void PlayMontage_Damaged();
 

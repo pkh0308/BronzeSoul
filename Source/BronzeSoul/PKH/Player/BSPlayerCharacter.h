@@ -17,6 +17,7 @@ enum class EPlayerState : uint8
 	Idle = 0,
 	Attack,
 	Guard,
+	GuardImpact,
 	Dodge,
 	Damaged,
 	KnockDown,
@@ -89,6 +90,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<class UInputAction> IA_Guard;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<class UInputAction> IA_Lock;
+
 	// Functions
 	UFUNCTION()
 	void Move(const FInputActionValue& InputAction);
@@ -108,6 +112,9 @@ protected:
 	UFUNCTION()
 	void Dodge(const FInputActionValue& InputAction);
 
+	UFUNCTION()
+	void LockOn(const FInputActionValue& InputAction);
+
 // Animation
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
@@ -119,6 +126,16 @@ protected:
 
 public:
 	FORCEINLINE FVector GetDirectionVec() const { return DirVec; }
+
+// Lock
+protected:
+	bool IsLockOn = false;
+
+	UPROPERTY(EditDefaultsOnly, Category="LockOn")
+	float LockOnDistance = 2000.0f;
+
+	UPROPERTY(VisibleAnywhere, Category = "LockOn")
+	TObjectPtr<AActor> CurTargetActor;
 
 // Equipment
 public:
@@ -271,10 +288,16 @@ protected:
 
 	void SetGuard(bool ActiveGuard);
 
+	bool CanGuard();
+
+	void GuardSuccess();
+
 public:
 	void SetShieldCollision(bool CurGuard);
 
 	bool OnGuardNow() const;
+
+	void GuardImpactEnd();
 
 // Dodge
 protected:
