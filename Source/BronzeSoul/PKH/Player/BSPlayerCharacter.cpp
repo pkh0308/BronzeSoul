@@ -21,8 +21,8 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 	// TeamID
 	TeamID = TEAM_ID_PLAYER;
 
-	// Tick Disable
-	PrimaryActorTick.bCanEverTick = false;
+	// Tick
+	PrimaryActorTick.bCanEverTick = true;
 
 	// Components
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PKH/Character/Paladin/Mesh/Paladin_J_Nordstrom.Paladin_J_Nordstrom'"));
@@ -163,6 +163,19 @@ void ABSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputCompoennt->BindAction(IA_Lock, ETriggerEvent::Started, this, &ABSPlayerCharacter::LockOn);
 }
 
+void ABSPlayerCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if(IsLockOn && nullptr != CurTargetActor && MoveComp->Velocity.Size() < LockOnThreshold )
+	{
+		FVector DirToTarget = (CurTargetActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+		DirToTarget.Z = 0;
+		const FRotator RotToTarget = DirToTarget.ToOrientationRotator();
+		SetActorRotation(RotToTarget);
+	}
+}
+
 #pragma region Input
 void ABSPlayerCharacter::Move(const FInputActionValue& InputAction)
 {
@@ -185,12 +198,13 @@ void ABSPlayerCharacter::Move(const FInputActionValue& InputAction)
 	AddMovementInput(RightVec, InputVec.Y);
 
 	// 락온 중이라면 카메라도 이동
-	if(IsLockOn)
+	if(IsLockOn && nullptr != CurTargetActor )
 	{
-		FVector CameraLoc = CameraComp->GetComponentLocation() + FVector::UpVector * 200;
-		const FVector TargetDir = (CurTargetActor->GetActorLocation() - CameraLoc).GetSafeNormal();
-		const FRotator TArgetRot = TargetDir.ToOrientationRotator();
-		GetController()->SetControlRotation(TArgetRot);
+		const FVector CameraLoc = CameraComp->GetComponentLocation() + FVector::UpVector * 150;
+		FVector TargetDir = (CurTargetActor->GetActorLocation() - CameraLoc).GetSafeNormal();
+		//TargetDir.Z = 0;
+		const FRotator TargetRot = TargetDir.ToOrientationRotator();
+		GetController()->SetControlRotation(TargetRot);
 	}
 }
 
@@ -287,7 +301,9 @@ void ABSPlayerCharacter::LockOn(const FInputActionValue& InputAction)
 
 	// 트레이스 후 성공 시 락온
 	const FVector BeginLoc = GetActorLocation();
-	const FVector EndLoc = CameraComp->GetComponentLocation() + CameraComp->GetForwardVector() * LockOnDistance + FVector::UpVector * 200;
+	FVector ForwardVec = CameraComp->GetForwardVector();
+	ForwardVec.Z = 0;
+	const FVector EndLoc = GetActorLocation() + ForwardVec * LockOnDistance;
 	FHitResult Result;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
@@ -632,7 +648,12 @@ bool ABSPlayerCharacter::CanGuard()
 {
 	// 플레이어와 적의 각도를 계산하여 일정 각도 이내일 경우 가드 성공 판정
 	// 이외의 경우에 실패 판정
-	return OnGuardNow();
+	if(false == OnGuardNow() || CurStamina < 20 )
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void ABSPlayerCharacter::GuardSuccess()
@@ -643,7 +664,7 @@ void ABSPlayerCharacter::GuardSuccess()
 	AnimInstance->PlayMontage_GuardImpact();
 
 	// 스태미나 소모
-	UseStamina(0);
+	UseStamina(20);
 }
 
 void ABSPlayerCharacter::OnShieldBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

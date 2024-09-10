@@ -26,7 +26,7 @@ UPaladinAnimInstance::UPaladinAnimInstance()
 		AM_Guard = AM_GuardRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_GuardImpactRef(TEXT(""));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM_GuardImpactRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Paladin_RootAdded/Blueprint/AM_GuardImpact.AM_GuardImpact'"));
 	if ( AM_GuardImpactRef.Object )
 	{
 		AM_GuardImpact = AM_GuardImpactRef.Object;

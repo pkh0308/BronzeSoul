@@ -38,6 +38,8 @@ protected:
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void Tick(float DeltaSeconds) override;
+
 // Variables for convenience
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -133,6 +135,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="LockOn")
 	float LockOnDistance = 2000.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "LockOn")
+	float LockOnThreshold = 200.0f;
 
 	UPROPERTY(VisibleAnywhere, Category = "LockOn")
 	TObjectPtr<AActor> CurTargetActor;
