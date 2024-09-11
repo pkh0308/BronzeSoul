@@ -54,7 +54,9 @@ protected:
 
 // Set Key
 public:
-	void SetKey_Player(AActor* Player);
+	void SetKey_Player(AActor* Player) const;
+
+	void SetKey_OnStagger(bool IsStagger) const;
 
 // Getter
 public:

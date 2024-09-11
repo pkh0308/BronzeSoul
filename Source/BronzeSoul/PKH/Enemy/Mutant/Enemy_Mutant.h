@@ -87,7 +87,9 @@ public:
 
 	void EndJumpAttack();
 
-// Die
+// Damaged & Die
 protected:
+	virtual void OnDamaged(int32 InDamage, AActor* Attacker) override;
+
 	virtual void OnDie() override;
 };

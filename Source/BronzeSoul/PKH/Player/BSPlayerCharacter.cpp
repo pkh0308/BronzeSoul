@@ -167,7 +167,7 @@ void ABSPlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if(IsLockOn && nullptr != CurTargetActor && MoveComp->Velocity.Size() < LockOnThreshold )
+	if(ShouldRotate())
 	{
 		FVector DirToTarget = (CurTargetActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 		DirToTarget.Z = 0;
@@ -229,6 +229,7 @@ void ABSPlayerCharacter::Attack(const FInputActionValue& InputAction)
 		return;
 	}
 
+	SetGuard(false);
 	EquipComp->Attack();
 }
 
@@ -240,10 +241,8 @@ void ABSPlayerCharacter::GuardOn(const FInputActionValue& InputAction)
 	}
 
 	CancelAttack();
-	SetState(EPlayerState::Guard);
-	UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::GuardOn] Guard On %d"), OnGuardNow());
-
 	SetGuard(true);
+	SetState(EPlayerState::Guard);
 }
 
 void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
@@ -253,10 +252,8 @@ void ABSPlayerCharacter::GuardOff(const FInputActionValue& InputAction)
 		return;
 	}
 
-	SetState(EPlayerState::Idle);
-	UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::GuardOff] Guard Off %d"), OnGuardNow());
-
 	SetGuard(false);
+	SetState(EPlayerState::Idle);
 }
 
 void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
@@ -322,6 +319,24 @@ void ABSPlayerCharacter::LockOn(const FInputActionValue& InputAction)
 #pragma endregion
 
 #pragma region Equipment
+bool ABSPlayerCharacter::ShouldRotate()
+{
+	if(false == IsLockOn || nullptr == CurTargetActor)
+	{
+		return false;
+	}
+	if ( MoveComp->Velocity.Size() > LockOnThreshold )
+	{
+		return false;
+	}
+	if(CurState == EPlayerState::Attack || CurState == EPlayerState::GuardImpact)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void ABSPlayerCharacter::SetWeaponMesh(TObjectPtr<UStaticMesh> NewWeaponMesh, FTransform NewTransform)
 {
 	WeaponComp->SetStaticMesh(NewWeaponMesh);
@@ -593,7 +608,7 @@ void ABSPlayerCharacter::OnWeaponBeginOverlap(UPrimitiveComponent* OverlappedCom
 		return;
 	}
 
-	Enemy->OnDamaged(EquipComp->GetWeaponAttackValue(), 0.5f, this);
+	Enemy->OnDamaged(EquipComp->GetWeaponAttackValue(), this);
 }
 
 void ABSPlayerCharacter::CancelAttack()
@@ -630,6 +645,11 @@ void ABSPlayerCharacter::SetGuard(bool ActiveGuard)
 {
 	if(ActiveGuard)
 	{
+		if ( CurState == EPlayerState::Guard )
+		{
+			return;
+		}
+
 		SetShieldCollision(true);
 		//AnimInstance->PlayMontage_Guard();
 		MoveComp->bOrientRotationToMovement = false;
@@ -637,6 +657,11 @@ void ABSPlayerCharacter::SetGuard(bool ActiveGuard)
 	}
 	else
 	{
+		if(CurState != EPlayerState::Guard)
+		{
+			return;
+		}
+
 		SetShieldCollision(false);
 		//AnimInstance->PlayMontage_Guard();
 		MoveComp->bOrientRotationToMovement = true;

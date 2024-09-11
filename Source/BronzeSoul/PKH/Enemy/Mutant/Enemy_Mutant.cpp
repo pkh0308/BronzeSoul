@@ -149,6 +149,8 @@ bool AEnemy_Mutant::IsWaitingJumpAttack()
 
 void AEnemy_Mutant::BeginJumpAttack()
 {
+	IsSuperArmor = true;
+
 	JA_Target = EnemyController->GetTargetActor();
 	if( JA_Target ) // Target이 nullptr이 아닐때만 점프 공격으로 이행
 	{
@@ -200,10 +202,22 @@ void AEnemy_Mutant::SetJumpAttackColl(bool IsActive)
 
 void AEnemy_Mutant::EndJumpAttack()
 {
+	IsSuperArmor = false;
+
 	JA_Target = nullptr;
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 
 	OnJumpAttackFinished.ExecuteIfBound();
+}
+
+void AEnemy_Mutant::OnDamaged(int32 InDamage, AActor* Attacker)
+{
+	Super::OnDamaged(InDamage, Attacker);
+
+	if(false == IsSuperArmor)
+	{
+		MyAnimInstance->PlayMontage_Damaged();
+	}
 }
 #pragma endregion
 

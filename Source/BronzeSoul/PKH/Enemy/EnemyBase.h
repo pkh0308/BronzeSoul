@@ -11,7 +11,7 @@ enum class EEnemyState : uint8
 {
 	Idle = 0,
 	Attack,
-	Damaged,
+	Stagger,
 	Die
 };
 
@@ -56,26 +56,18 @@ protected:
 
 	FTimerHandle StaggerHandle;
 
-	void StaggerOff();
-
 	void SetHp(int32 NewHp);
-
-	// 피격 시 일정시간 무적 처리
-	UPROPERTY(EditDefaultsOnly)
-	float InvincibleTime = 0.2f;
-
-	UPROPERTY(VisibleAnywhere)
-	bool IsInvincible = false;
-
-	FTimerHandle InvincibleHandle;
-
-	UFUNCTION()
-	void InvincibleOff();
 
 public:
 	FOnEnemyHpChanged OnHpChanged;
 
-	virtual void OnDamaged(int32 InDamage, float StaggerTime, AActor* Attacker);
+	virtual void OnDamaged(int32 InDamage, AActor* Attacker);
+
+	void StaggerOff();
+
+// SuperArmor
+protected:
+	bool IsSuperArmor = false;
 
 // Attack
 protected:

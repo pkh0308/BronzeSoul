@@ -39,11 +39,15 @@ protected:
 	TObjectPtr<class UAnimMontage> Montage_JumpAttack;
 
 	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UAnimMontage> Montage_Damaged;
+
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UAnimMontage> Montage_Die;
 
 public:
 	void PlayMontage_Attack();
 	void PlayMontage_JumpAttack();
+	void PlayMontage_Damaged();
 	void PlayMontage_Die();
 
 // Section Check

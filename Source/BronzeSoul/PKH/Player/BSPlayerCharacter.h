@@ -142,6 +142,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "LockOn")
 	TObjectPtr<AActor> CurTargetActor;
 
+	bool ShouldRotate();
+
 // Equipment
 public:
 	void SetWeaponMesh(TObjectPtr<class UStaticMesh> NewWeaponMesh, FTransform NewTransform);

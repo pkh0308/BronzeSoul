@@ -10,3 +10,5 @@
 // Int
 #define KEY_RAND_IDX TEXT("RandIdx")
 #define KEY_MAX_IDX TEXT("MaxIdx")
+// bool
+#define KEY_ON_STAGGER TEXT("OnStagger")

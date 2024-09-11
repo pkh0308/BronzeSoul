@@ -81,6 +81,7 @@ void AEnemyBase::StaggerOff()
 	if(false == IsDead())
 	{
 		SetState(EEnemyState::Idle);
+		EnemyController->SetKey_OnStagger(false);
 	}
 }
 
@@ -98,36 +99,20 @@ void AEnemyBase::SetHp(int32 NewHp)
 	}
 }
 
-void AEnemyBase::OnDamaged(int32 InDamage, float StaggerTime, AActor* Attacker)
+void AEnemyBase::OnDamaged(int32 InDamage, AActor* Attacker)
 {
-	// 무적 여부 검사
-	// 피격 후 InvincibleTime만큼 무적 부여
-	if(IsInvincible)
-	{
-		return;
-	}
-	IsInvincible = true;
-	GetWorldTimerManager().SetTimer(InvincibleHandle, this, &AEnemyBase::InvincibleOff, InvincibleTime, false);
-
-	SetState(EEnemyState::Damaged);
 	SetHp(CurHp - InDamage);
 
-	// Reset Timer if already timer in active
-	if(GetWorldTimerManager().IsTimerActive(StaggerHandle))
+	if(false == IsSuperArmor)
 	{
-		GetWorldTimerManager().ClearTimer(StaggerHandle);
+		SetState(EEnemyState::Stagger);
+		EnemyController->SetKey_OnStagger(true);
 	}
-	GetWorldTimerManager().SetTimer(StaggerHandle, this, &AEnemyBase::StaggerOff, StaggerTime, false);
 
 	if(Attacker->IsA<ABSPlayerCharacter>())
 	{
 		EnemyController->SetKey_Player(Attacker);
 	}
-}
-
-void AEnemyBase::InvincibleOff()
-{
-	IsInvincible = false;
 }
 #pragma endregion
 

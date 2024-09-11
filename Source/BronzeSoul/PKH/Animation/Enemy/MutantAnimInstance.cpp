@@ -19,6 +19,12 @@ UMutantAnimInstance::UMutantAnimInstance()
 		Montage_JumpAttack = Montage_JumpAttackRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> Montage_DamagedRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Mutant/Blueprint/AM_Damaged.AM_Damaged'"));
+	if ( Montage_DamagedRef.Object )
+	{
+		Montage_Damaged = Montage_DamagedRef.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> Montage_DieRef(TEXT("/Script/Engine.AnimMontage'/Game/PKH/Character/Mutant/Blueprint/AM_Die.AM_Die'"));
 	if ( Montage_DieRef.Object )
 	{
@@ -54,6 +60,11 @@ void UMutantAnimInstance::PlayMontage_Attack()
 void UMutantAnimInstance::PlayMontage_JumpAttack()
 {
 	Montage_Play(Montage_JumpAttack);
+}
+
+void UMutantAnimInstance::PlayMontage_Damaged()
+{
+	Montage_Play(Montage_Damaged);
 }
 
 void UMutantAnimInstance::PlayMontage_Die()

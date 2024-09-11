@@ -123,13 +123,18 @@ void AEnemyAIController::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 #pragma endregion
 
 #pragma region Set Key
-void AEnemyAIController::SetKey_Player(AActor* Player)
+void AEnemyAIController::SetKey_Player(AActor* Player) const
 {
 	BBComp->SetValueAsObject(KEY_PLAYER, Player);
 }
+
+void AEnemyAIController::SetKey_OnStagger(bool IsStagger) const
+{
+	BBComp->SetValueAsBool(KEY_ON_STAGGER, IsStagger);
+}
+#pragma endregion
 
 AActor* AEnemyAIController::GetTargetActor() const
 {
 	return Cast<AActor>(BBComp->GetValueAsObject(KEY_PLAYER));
 }
-#pragma endregion
