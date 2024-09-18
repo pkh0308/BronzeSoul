@@ -452,7 +452,7 @@ void ABSPlayerCharacter::SetHp(int32 NewHp)
 	}
 }
 
-void ABSPlayerCharacter::OnDamaged(int32 InDamage, int32 InKnockDamage)
+void ABSPlayerCharacter::OnDamaged(const int32 InDamage, const int32 InKnockDamage, FVector SourceForward)
 {
 	if(IsDead())
 	{
@@ -472,7 +472,7 @@ void ABSPlayerCharacter::OnDamaged(int32 InDamage, int32 InKnockDamage)
 		// 실패했다면 가드 상태 해제 후 피격 
 		if (OnGuardNow())
 		{
-			if(CanGuard())
+			if(CanGuard(SourceForward))
 			{
 				GuardSuccess();
 				return;
@@ -669,16 +669,29 @@ void ABSPlayerCharacter::SetGuard(bool ActiveGuard)
 	}
 }
 
-bool ABSPlayerCharacter::CanGuard()
+bool ABSPlayerCharacter::CanGuard(FVector SourceForward) const
 {
-	// 플레이어와 적의 각도를 계산하여 일정 각도 이내일 경우 가드 성공 판정
-	// 이외의 경우에 실패 판정
-	if(false == OnGuardNow() || CurStamina < 20 )
+	// 스태미나가 부족하면 실패 판정
+	if (CurStamina < DeltaStamina_GuardSuccess )
 	{
 		return false;
 	}
 
-	return true;
+	// 플레이어와 적이 바라보는 각도를 계산하여 일정 각도 이내일 경우 가드 성공 판정
+	// Z축 값은 0으로 수정하여 사용
+	FVector PlayerForward = GetActorForwardVector();
+	PlayerForward.Z = 0;
+	SourceForward.Z = 0;
+	float DP = FVector::DotProduct(PlayerForward.GetSafeNormal(), SourceForward.GetSafeNormal());
+	float Radian = FMath::Acos(DP);
+	float Degree = FMath::RadiansToDegrees(Radian);  UE_LOG(LogTemp, Log, TEXT("[ABSPlayerCharacter::CanGuard] Degre: %f"), Degree);
+	if(Degree > Threshold_GuardSuccess )
+	{
+		return true;
+	}
+
+	// 이외의 경우에 실패 판정
+	return false;
 }
 
 void ABSPlayerCharacter::GuardSuccess()

@@ -188,7 +188,7 @@ public:
 
 	int32 GetCurHp() const;
 
-	void OnDamaged(int32 InDamage, int32 InKnockDamage);
+	void OnDamaged(const int32 InDamage, const int32 InKnockDamage, FVector SourceForward);
 
 	void OnDamagedEnd();
 
@@ -285,7 +285,13 @@ protected:
 	int32 DeltaStamina_Guard = 1;
 
 	UPROPERTY(EditAnywhere)
+	int32 DeltaStamina_GuardSuccess = 20;
+
+	UPROPERTY(EditAnywhere)
 	float DeltaTime_Guard = 0.1f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float Threshold_GuardSuccess = 165.0f;
 
 	FTimerHandle GuardHandle;
 
@@ -295,7 +301,7 @@ protected:
 
 	void SetGuard(bool ActiveGuard);
 
-	bool CanGuard();
+	bool CanGuard(FVector SourceForward) const;
 
 	void GuardSuccess();
 

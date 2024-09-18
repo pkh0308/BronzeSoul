@@ -125,7 +125,7 @@ void AEnemy_Mutant::NormalAttack(UPrimitiveComponent* OverlappedComponent, AActo
 		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("[AEnemy_Mutant::NormalAttack] "));
-	Player->OnDamaged(20, 400); // 임시값
+	Player->OnDamaged(20, 400, GetActorForwardVector()); // 임시값
 }
 #pragma endregion
 
@@ -139,7 +139,7 @@ void AEnemy_Mutant::JumpAttack(UPrimitiveComponent* OverlappedComponent, AActor*
 		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("[AEnemy_Mutant::JumpAttack] "));
-	Player->OnDamaged(50, 1200); // 임시값
+	Player->OnDamaged(50, 1200, GetActorForwardVector()); // 임시값
 }
 
 bool AEnemy_Mutant::IsWaitingJumpAttack()
