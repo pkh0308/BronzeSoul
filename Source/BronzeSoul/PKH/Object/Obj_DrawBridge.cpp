@@ -26,6 +26,10 @@ AObj_DrawBridge::AObj_DrawBridge()
 	DetectComp->OnComponentEndOverlap.AddDynamic(this, &AObj_DrawBridge::OnLostPlayer);
 
 	UIComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("UIComp"));
+	UIComp->SetupAttachment(RootComponent);
+	UIComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	UIComp->SetWidgetSpace(EWidgetSpace::Screen);
+	UIComp->SetDrawSize(FVector2D(200, 120));
 	static ConstructorHelpers::FClassFinder<UInteractWidget> UIClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/PKH/UI/WBP_Interact.WBP_Interact'"));
 	if(UIClassRef.Class)
 	{
@@ -39,6 +43,7 @@ void AObj_DrawBridge::BeginPlay()
 	Super::BeginPlay();
 
 	InteractUI = CastChecked<UInteractWidget>(UIComp->GetWidget());
+	UIComp->InitWidget();
 	InteractUI->UpdateText(TEXT("도개교 내리기"));
 	InteractUI->SetVisibility(ESlateVisibility::Hidden);
 }
@@ -66,20 +71,33 @@ void AObj_DrawBridge::OnDetectPlayer(UPrimitiveComponent* OverlappedComponent, A
 									 UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ABSPlayerCharacter* Player = Cast<ABSPlayerCharacter>(OtherActor);
-	if( Player )
+	if(nullptr == Player)
+	{
+		return;
+	}
+
+	Player->SetInteractionObj(this);
+	IsNearPlayer = true;
+	if(false == IsDrawing)
 	{
 		InteractUI->SetVisibility(ESlateVisibility::Visible);
-		IsNearPlayer = true;
 	}
 }
 
 void AObj_DrawBridge::OnLostPlayer(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+								   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if( InteractUI->IsVisible())
+	ABSPlayerCharacter* Player = Cast<ABSPlayerCharacter>(OtherActor);
+	if(nullptr == Player)
+	{
+		return;
+	}
+
+	Player->SetInteractionObj(nullptr);
+	IsNearPlayer = false;
+	if (false == IsDrawing)
 	{
 		InteractUI->SetVisibility(ESlateVisibility::Hidden);
-		IsNearPlayer = false;
 	}
 }
 
@@ -87,7 +105,7 @@ void AObj_DrawBridge::DrawComplete()
 {
 	IsDrawing = false;
 	// 아직 플레이어가 근처에 있다면 UI 활성화
-	if(IsNearPlayer )
+	if(IsNearPlayer)
 	{
 		InteractUI->SetVisibility(ESlateVisibility::Visible);
 	}
@@ -107,6 +125,11 @@ void AObj_DrawBridge::DrawComplete()
 // Interact override
 void AObj_DrawBridge::Interact()
 {
+	if(IsDrawing)
+	{
+		return;
+	}
+
 	IsDrawing = true;
 	// 작동 중에는 UI 감추기
 	InteractUI->SetVisibility(ESlateVisibility::Hidden);

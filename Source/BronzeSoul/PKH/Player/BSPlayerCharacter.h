@@ -93,6 +93,9 @@ protected:
 	TObjectPtr<class UInputAction> IA_Guard;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<class UInputAction> IA_Interaction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<class UInputAction> IA_Lock;
 
 	// Functions
@@ -113,6 +116,9 @@ protected:
 
 	UFUNCTION()
 	void Dodge(const FInputActionValue& InputAction);
+
+	UFUNCTION()
+	void Interact(const FInputActionValue& InputAction);
 
 	UFUNCTION()
 	void LockOn(const FInputActionValue& InputAction);
@@ -320,7 +326,14 @@ protected:
 public:
 	void DodgeEnd();
 
-// Die
+// Interaction
+protected:
+	class IInteractive* InteractionObj;
+
+public:
+	void SetInteractionObj(class IInteractive* NewInteractionObj);
+
+	// Die
 public:
 	bool IsDead();
 	void GameOver();

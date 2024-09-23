@@ -67,10 +67,10 @@ protected:
 	bool IsNearPlayer = false;
 
 	UPROPERTY(EditAnywhere)
-	float DrawSpeed = 1.0f;
+	float DrawSpeed = 40.0f;
 
 	UPROPERTY(EditAnywhere)
-	float Threshold_DrawRotation = 0.1f;
+	float Threshold_DrawRotation = 0.01f;
 
 	EBridgeState CurState = EBridgeState::Up;
 

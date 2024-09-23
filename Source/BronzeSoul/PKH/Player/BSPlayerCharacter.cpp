@@ -14,6 +14,7 @@
 #include "PKH/Component/EquipComponent.h"
 #include "PKH/Enemy/EnemyBase.h"
 #include "PKH/Game/BronzeSoulGameMode.h"
+#include "PKH/Interface/Interactive.h"
 
 // Sets default values
 ABSPlayerCharacter::ABSPlayerCharacter()
@@ -112,6 +113,11 @@ ABSPlayerCharacter::ABSPlayerCharacter()
 	{
 		IA_Guard = IA_GuardRef.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_InteractionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/PKH/Input/IA_BSInteraction.IA_BSInteraction'"));
+	if ( IA_InteractionRef.Object )
+	{
+		IA_Interaction = IA_InteractionRef.Object;
+	}
 	static ConstructorHelpers::FObjectFinder<UInputAction> IA_LockRef(TEXT("/Script/EnhancedInput.InputAction'/Game/PKH/Input/IA_BSLockOn.IA_BSLockOn'"));
 	if ( IA_LockRef.Object )
 	{
@@ -159,6 +165,8 @@ void ABSPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputCompoennt->BindAction(IA_Guard, ETriggerEvent::Started, this, &ABSPlayerCharacter::GuardOn);
 	EnhancedInputCompoennt->BindAction(IA_Guard, ETriggerEvent::Completed, this, &ABSPlayerCharacter::GuardOff);
+
+	EnhancedInputCompoennt->BindAction(IA_Interaction, ETriggerEvent::Started, this, &ABSPlayerCharacter::Interact);
 
 	EnhancedInputCompoennt->BindAction(IA_Lock, ETriggerEvent::Started, this, &ABSPlayerCharacter::LockOn);
 }
@@ -285,6 +293,16 @@ void ABSPlayerCharacter::Dodge(const FInputActionValue& InputAction)
 	SetActorRotation(TargetRotation);
 
 	AnimInstance->PlayMontage_Dodge();
+}
+
+void ABSPlayerCharacter::Interact(const FInputActionValue& InputAction)
+{
+	if( InteractionObj == nullptr )
+	{
+		return;
+	}
+
+	InteractionObj->Interact();
 }
 
 void ABSPlayerCharacter::LockOn(const FInputActionValue& InputAction)
@@ -739,6 +757,13 @@ void ABSPlayerCharacter::GuardImpactEnd()
 void ABSPlayerCharacter::DodgeEnd()
 {
 	SetState(EPlayerState::Idle);
+}
+#pragma endregion
+
+#pragma region Interaction
+void ABSPlayerCharacter::SetInteractionObj(IInteractive* NewInteractionObj)
+{
+	InteractionObj = NewInteractionObj;
 }
 #pragma endregion
 
