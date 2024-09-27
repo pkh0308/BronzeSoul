@@ -50,7 +50,7 @@ EBTNodeResult::Type UBTTask_WalkAround::ExecuteTask(UBehaviorTreeComponent& Owne
 	FNavLocation ResultLoc;
 	if(NavSystem->GetRandomPointInNavigableRadius(Origin, RotateRadius, ResultLoc))
 	{
-		//BBComp->SetValueAsVector();
+		BBComp->SetValueAsVector(KEY_PATROL_LOC, ResultLoc.Location); UE_LOG(LogTemp, Log, TEXT("UBTTask_WalkAround"));
 	}
 
 	return EBTNodeResult::Succeeded;
